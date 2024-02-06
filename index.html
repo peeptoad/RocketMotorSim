@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,11 +107,9 @@
             var maxThrust = 0;
             var burnoutTime = 0;
             var timeToMaxThrust = 0;
+            var totalTime = 0;
 
-            // Initialize previous time
-            var prevTime = 0;
-
-            for (var i = 0; i < data.labels.length; i++) {
+            for (var i = 1; i < data.labels.length; i++) {
                 var force = data.datasets[0].data[i];
                 var time = parseFloat(data.labels[i]);
 
@@ -121,42 +120,27 @@
                 }
 
                 // Check for burnout time
-                if (force === 0 && prevTime !== 0) {
-                    burnoutTime = prevTime;
+                if (force === 0 && burnoutTime === 0) {
+                    burnoutTime = time;
                 }
 
-                // Calculate total impulse only if there's thrust
-                if (force !== 0) {
-                    // Calculate time duration since the previous data point
-                    var deltaTime = time - prevTime;
-                    // Add to total impulse considering the force and time duration
-                    totalImpulse += force * deltaTime;
-                    // Update previous time
-                    prevTime = time;
-                }
+                // Calculate total impulse
+                var deltaTime = time - parseFloat(data.labels[i - 1]);
+                totalImpulse += (force + data.datasets[0].data[i - 1]) / 2 * deltaTime;
+
+                // Calculate total time
+                totalTime += deltaTime;
             }
 
-            // Calculate thrust duration
-            var thrustDuration = prevTime;
-
             // Calculate average thrust
-            var averageThrust = totalImpulse / thrustDuration;
+            var averageThrust = totalImpulse / totalTime;
 
             // Convert average thrust to Newtons
             var averageThrustNewton = averageThrust * 4.44822;
 
-            // Calculate area under the thrust curve
-            var areaUnderCurve = totalImpulse;
-
-            // Calculate exhaust velocity in m/s
-            var nozzleExitArea = Math.PI * Math.pow(throatDiameter / 2, 2); // Assuming a circular nozzle
-            var ambientPressure = 101325; // Pa (standard atmospheric pressure)
-            var gasConstant = 287; // J/(kg·K) - specific gas constant for air
-            var massFlowRate = (ambientPressure * nozzleExitArea) / Math.sqrt(data.labels[data.labels.length - 1] * gasConstant);
-            var exhaustVelocity = totalImpulse / massFlowRate;
-
-            // Convert exhaust velocity to mph
-            var exhaustVelocityMph = exhaustVelocity * 2.23694; // 1 m/s = 2.23694 mph
+            // Convert burnout time and time to max thrust to seconds
+            burnoutTime = parseFloat(burnoutTime);
+            timeToMaxThrust = parseFloat(timeToMaxThrust);
 
             // Display metrics
             document.getElementById('totalImpulse').innerText = totalImpulse.toFixed(2);
@@ -165,8 +149,16 @@
             document.getElementById('maxThrust').innerText = maxThrust.toFixed(2);
             document.getElementById('timeToMaxThrust').innerText = timeToMaxThrust.toFixed(2);
             document.getElementById('burnoutTime').innerText = burnoutTime.toFixed(2);
-            document.getElementById('thrustDuration').innerText = thrustDuration.toFixed(2);
-            document.getElementById('areaUnderCurve').innerText = areaUnderCurve.toFixed(2);
+            document.getElementById('thrustDuration').innerText = totalTime.toFixed(2);
+
+            // Calculate and display exhaust velocity in mph
+            var throatDiameterInch = parseFloat(document.getElementById('throatDiameter').innerText);
+            var nozzleExitArea = Math.PI * Math.pow(throatDiameterInch / 2, 2);
+            var ambientPressure = 101325; // Pa (standard atmospheric pressure)
+            var gasConstant = 287; // J/(kg·K) - specific gas constant for air
+            var massFlowRate = (ambientPressure * nozzleExitArea) / Math.sqrt(totalTime * gasConstant);
+            var exhaustVelocity = totalImpulse / massFlowRate;
+            var exhaustVelocityMph = exhaustVelocity * 2.23694; // 1 m/s = 2.23694 mph
             document.getElementById('exhaustVelocity').innerText = exhaustVelocityMph.toFixed(2);
         }
     </script>
