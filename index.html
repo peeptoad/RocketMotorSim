@@ -107,9 +107,9 @@
         function calculateMetrics() {
             var totalImpulse = 0;
             var maxThrust = 0;
-            var burnoutTime = 0;
+            var burnoutTime = parseFloat(data.labels[data.labels.length - 1]);
             var timeToMaxThrust = 0;
-            var totalTime = 0;
+            var totalTime = burnoutTime;
 
             for (var i = 1; i < data.labels.length; i++) {
                 var force = data.datasets[0].data[i];
@@ -119,11 +119,6 @@
                 if (force > maxThrust) {
                     maxThrust = force;
                     timeToMaxThrust = time;
-                }
-
-                // Check for burnout time
-                if (force === 0 && burnoutTime === 0) {
-                    burnoutTime = time;
                 }
 
                 // Calculate total impulse
@@ -146,11 +141,13 @@
             document.getElementById('thrustDuration').innerText = totalTime.toFixed(2);
 
             // Calculate and display max exhaust velocity in m/s
+            var massFlowRate = propellantMass / burnoutTime; // lbs/s
             var maxExhaustVelocity = specificImpulse * 9.81; // m/s
             document.getElementById('maxExhaustVelocity').innerText = maxExhaustVelocity.toFixed(2);
         }
     </script>
 </body>
 </html>
+
 
 
