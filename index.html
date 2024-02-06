@@ -2,144 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Thrust Graph</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocket Engine Thrust Profile Analyzer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <canvas id="thrustChart" width="400" height="400"></canvas>
+    <h1>Rocket Engine Thrust Profile Analyzer</h1>
 
-    <div>
-        <label for="weightInput">Weight (lbs):</label>
-        <button onclick="incrementWeight(0.5)">+</button>
-        <span id="weightValue">0</span>
-        <button onclick="decrementWeight(0.5)">-</button>
-        
-        <label for="timeInput">Time (seconds):</label>
-        <button onclick="incrementTime(0.25)">+</button>
-        <span id="timeValue">0</span>
-        <button onclick="decrementTime(0.25)">-</button>
+    <label for="weight">Weight (lbs):</label>
+    <input type="number" id="weight">
+    <label for="time">Time (s):</label>
+    <input type="number" id="time">
+    <button onclick="addData()">Add Data Point</button>
 
-        <button onclick="addDataPoint()">Add Data Point</button>
-        <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
-    </div>
+    <label for="propellantMass">Initial Propellant Mass (lbs):</label>
+    <input type="number" id="propellantMass">
+    <label for="throatDiameter">Nozzle Throat Diameter (in):</label>
+    <input type="number" id="throatDiameter">
+    <label for="exitDiameter">Nozzle Exit Diameter (in):</label>
+    <input type="number" id="exitDiameter">
 
-    <div>
-        <label for="propMassInput">Initial Propellant Mass (g):</label>
-        <button onclick="incrementPropMass(1)">+</button>
-        <span id="propMassValue">0</span>
-        <button onclick="decrementPropMass(1)">-</button>
-        
-        <label for="throatDiameterInput">Throat Diameter (in):</label>
-        <button onclick="incrementThroatDiameter(0.01)">+</button>
-        <span id="throatDiameterValue">0</span>
-        <button onclick="decrementThroatDiameter(0.01)">-</button>
+    <label for="ejectionTime">Ejection Charge Time (s):</label>
+    <input type="number" id="ejectionTime">
+    <button onclick="addEjectionCharge()">Add Ejection Charge</button>
 
-        <label for="exitDiameterInput">Nozzle Exit Diameter (in):</label>
-        <button onclick="incrementExitDiameter(0.01)">+</button>
-        <span id="exitDiameterValue">0</span>
-        <button onclick="decrementExitDiameter(0.01)">-</button>
-
-        <button onclick="calculateThrust()">Calculate Thrust</button>
-    </div>
-
-    <div id="metrics">
-        <h2>Calculated Metrics</h2>
-        <p>Max Thrust: <span id="maxThrust"></span> lbs</p>
-        <p>Exhaust Velocity: <span id="exhaustVelocity"></span> m/s</p>
-        <p>Total Impulse: <span id="totalImpulse"></span> Ns</p>
-        <p>Mass Flow Rate: <span id="massFlowRate"></span> g/s</p>
-        <p>Time to Max Thrust: <span id="timeToMaxThrust"></span> s</p>
-        <p>Thrust Duration: <span id="thrustDuration"></span> s</p>
-        <!-- You can include additional metrics here -->
-    </div>
+    <canvas id="thrustProfile"></canvas>
 
     <script>
-        var weight = 0;
-        var time = 0;
-        var propMass = 0;
-        var throatDiameter = 0;
-        var exitDiameter = 0;
+        let weights = [];
+        let times = [];
+        let ejectionTimes = [];
 
-        function incrementWeight(step) {
-            weight += step;
-            document.getElementById('weightValue').textContent = weight.toFixed(2);
-            addDataPoint();
+        function addData() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const time = parseFloat(document.getElementById('time').value);
+
+            weights.push(weight);
+            times.push(time);
+
+            updateGraph();
         }
 
-        function decrementWeight(step) {
-            if (weight >= step) {
-                weight -= step;
-                document.getElementById('weightValue').textContent = weight.toFixed(2);
-                addDataPoint();
-            }
-        }
+        function addEjectionCharge() {
+            const ejectionTime = parseFloat(document.getElementById('ejectionTime').value);
+            ejectionTimes.push(ejectionTime);
 
-        function incrementTime(step) {
-            time += step;
-            document.getElementById('timeValue').textContent = time.toFixed(2);
-            addDataPoint();
-        }
-
-        function decrementTime(step) {
-            if (time >= step) {
-                time -= step;
-                document.getElementById('timeValue').textContent = time.toFixed(2);
-                addDataPoint();
-            }
-        }
-
-        function incrementPropMass(step) {
-            propMass += step;
-            document.getElementById('propMassValue').textContent = propMass.toFixed(2);
-        }
-
-        function decrementPropMass(step) {
-            if (propMass >= step) {
-                propMass -= step;
-                document.getElementById('propMassValue').textContent = propMass.toFixed(2);
-            }
-        }
-
-        function incrementThroatDiameter(step) {
-            throatDiameter += step;
-            document.getElementById('throatDiameterValue').textContent = throatDiameter.toFixed(2);
-        }
-
-        function decrementThroatDiameter(step) {
-            if (throatDiameter >= step) {
-                throatDiameter -= step;
-                document.getElementById('throatDiameterValue').textContent = throatDiameter.toFixed(2);
-            }
-        }
-
-        function incrementExitDiameter(step) {
-            exitDiameter += step;
-            document.getElementById('exitDiameterValue').textContent = exitDiameter.toFixed(2);
-        }
-
-        function decrementExitDiameter(step) {
-            if (exitDiameter >= step) {
-                exitDiameter -= step;
-                document.getElementById('exitDiameterValue').textContent = exitDiameter.toFixed(2);
-            }
-        }
-
-        function addDataPoint() {
-            // Add code to update the graph with new data points
-        }
-
-        function removeLastDataPoint() {
-            // Add code to remove the last data point from the graph
+            updateGraph();
         }
 
         function calculateThrust() {
-            // Add code to calculate thrust and update metrics
-            addDataPoint(); // Call addDataPoint to update the graph initially
+            // Perform thrust calculations using weights, times, ejectionTimes,
+            // propellant mass, throat diameter, and exit diameter.
+            // You can access these arrays and input values here.
+        }
+
+        function updateGraph() {
+            const ctx = document.getElementById('thrustProfile').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'Weight over Time',
+                        data: weights,
+                        borderColor: 'blue',
+                        borderWidth: 1,
+                        fill: false
+                    }, {
+                        label: 'Ejection Charge',
+                        data: ejectionTimes.map(time => ({ x: time, y: 0 })),
+                        borderColor: 'red',
+                        pointBackgroundColor: 'red',
+                        pointRadius: 5,
+                        borderWidth: 1,
+                        fill: false,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (s)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Weight (lbs)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            calculateThrust();
         }
     </script>
 </body>
 </html>
+
 
 
 
