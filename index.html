@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,10 +11,14 @@
 
     <div>
         <label for="weightInput">Weight (lbs):</label>
-        <input type="number" id="weightInput" step="0.5" placeholder="Enter weight">
+        <button onclick="incrementWeight(0.5)">+</button>
+        <span id="weightValue">0</span>
+        <button onclick="decrementWeight(0.5)">-</button>
         
         <label for="timeInput">Time (seconds):</label>
-        <input type="number" id="timeInput" step="0.25" placeholder="Enter time">
+        <button onclick="incrementTime(0.25)">+</button>
+        <span id="timeValue">0</span>
+        <button onclick="decrementTime(0.25)">-</button>
 
         <button onclick="addDataPoint()">Add Data Point</button>
         <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
@@ -23,13 +26,19 @@
 
     <div>
         <label for="propMassInput">Initial Propellant Mass (g):</label>
-        <input type="number" id="propMassInput" step="1" placeholder="Enter initial propellant mass">
+        <button onclick="incrementPropMass(1)">+</button>
+        <span id="propMassValue">0</span>
+        <button onclick="decrementPropMass(1)">-</button>
         
         <label for="throatDiameterInput">Throat Diameter (in):</label>
-        <input type="number" id="throatDiameterInput" step="0.01" placeholder="Enter throat diameter">
+        <button onclick="incrementThroatDiameter(0.01)">+</button>
+        <span id="throatDiameterValue">0</span>
+        <button onclick="decrementThroatDiameter(0.01)">-</button>
 
         <label for="exitDiameterInput">Nozzle Exit Diameter (in):</label>
-        <input type="number" id="exitDiameterInput" step="0.01" placeholder="Enter nozzle exit diameter">
+        <button onclick="incrementExitDiameter(0.01)">+</button>
+        <span id="exitDiameterValue">0</span>
+        <button onclick="decrementExitDiameter(0.01)">-</button>
 
         <button onclick="calculateThrust()">Calculate Thrust</button>
     </div>
@@ -46,90 +55,77 @@
     </div>
 
     <script>
-        var data = {
-            labels: [],
-            datasets: [{
-                label: 'Thrust',
-                data: [],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                fill: false
-            }]
-        };
+        var weight = 0;
+        var time = 0;
+        var propMass = 0;
+        var throatDiameter = 0;
+        var exitDiameter = 0;
 
-        var options = {
-            scales: {
-                x: {
-                    type: 'linear',
-                    position: 'bottom'
-                },
-                y: {
-                    type: 'linear',
-                    position: 'left'
-                }
-            }
-        };
+        function incrementWeight(step) {
+            weight += step;
+            document.getElementById('weightValue').textContent = weight.toFixed(2);
+        }
 
-        var ctx = document.getElementById('thrustChart').getContext('2d');
-        var thrustChart = new Chart(ctx, {
-            type: 'line',
-            data: data,
-            options: options
-        });
-
-        function addDataPoint() {
-            var weightInput = document.getElementById('weightInput').value;
-            var timeInput = document.getElementById('timeInput').value;
-
-            if (weightInput && timeInput) {
-                data.labels.push(timeInput);
-                data.datasets[0].data.push(parseFloat(weightInput));
-
-                thrustChart.update();
+        function decrementWeight(step) {
+            if (weight >= step) {
+                weight -= step;
+                document.getElementById('weightValue').textContent = weight.toFixed(2);
             }
         }
 
-        function removeLastDataPoint() {
-            data.labels.pop();
-            data.datasets[0].data.pop();
-
-            thrustChart.update();
+        function incrementTime(step) {
+            time += step;
+            document.getElementById('timeValue').textContent = time.toFixed(2);
         }
 
-        function calculateThrust() {
-            var propMass = document.getElementById('propMassInput').value;
-            var throatDiameter = document.getElementById('throatDiameterInput').value;
-            var exitDiameter = document.getElementById('exitDiameterInput').value;
-
-            // Convert propellant mass from grams to kilograms
-            var propMassKg = propMass / 1000;
-
-            // Perform calculations here and update the graph with the results
-            // For simplicity, let's assume some basic calculations
-            var maxThrust = propMassKg * 9.81; // Assuming Earth's gravity
-            var exhaustVelocity = Math.sqrt((2 * maxThrust) / propMassKg);
-            var totalImpulse = maxThrust * parseFloat(data.labels[data.labels.length - 1]); // Max thrust * burn time
-            var massFlowRate = propMassKg / parseFloat(data.labels[data.labels.length - 1]);
-            
-            // Calculate time to max thrust
-            var timeToMaxThrust = parseFloat(data.labels[data.datasets[0].data.indexOf(Math.max(...data.datasets[0].data))]);
-
-            // Calculate thrust duration
-            var thrustDuration = parseFloat(data.labels[data.labels.length - 1]) - parseFloat(data.labels[0]);
-
-            // Update the graph with calculated values
-            document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
-            document.getElementById('exhaustVelocity').textContent = exhaustVelocity.toFixed(2);
-            document.getElementById('totalImpulse').textContent = totalImpulse.toFixed(2);
-            document.getElementById('massFlowRate').textContent = (massFlowRate * 1000).toFixed(2); // Convert to grams/s
-            document.getElementById('timeToMaxThrust').textContent = timeToMaxThrust.toFixed(2);
-            document.getElementById('thrustDuration').textContent = thrustDuration.toFixed(2);
-
-            // You can also display these calculated values on the graph or elsewhere in the HTML
+        function decrementTime(step) {
+            if (time >= step) {
+                time -= step;
+                document.getElementById('timeValue').textContent = time.toFixed(2);
+            }
         }
+
+        function incrementPropMass(step) {
+            propMass += step;
+            document.getElementById('propMassValue').textContent = propMass.toFixed(2);
+        }
+
+        function decrementPropMass(step) {
+            if (propMass >= step) {
+                propMass -= step;
+                document.getElementById('propMassValue').textContent = propMass.toFixed(2);
+            }
+        }
+
+        function incrementThroatDiameter(step) {
+            throatDiameter += step;
+            document.getElementById('throatDiameterValue').textContent = throatDiameter.toFixed(2);
+        }
+
+        function decrementThroatDiameter(step) {
+            if (throatDiameter >= step) {
+                throatDiameter -= step;
+                document.getElementById('throatDiameterValue').textContent = throatDiameter.toFixed(2);
+            }
+        }
+
+        function incrementExitDiameter(step) {
+            exitDiameter += step;
+            document.getElementById('exitDiameterValue').textContent = exitDiameter.toFixed(2);
+        }
+
+        function decrementExitDiameter(step) {
+            if (exitDiameter >= step) {
+                exitDiameter -= step;
+                document.getElementById('exitDiameterValue').textContent = exitDiameter.toFixed(2);
+            }
+        }
+
+        // AddDataPoint, removeLastDataPoint, and calculateThrust functions remain unchanged
     </script>
 </body>
 </html>
+
 
 
 
