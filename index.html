@@ -17,6 +17,7 @@
         <input type="number" id="timeInput" step="0.25" placeholder="Enter time">
 
         <button onclick="addDataPoint()">Add Data Point</button>
+        <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
     </div>
 
     <div>
@@ -37,6 +38,9 @@
         <p>Max Thrust: <span id="maxThrust"></span> lbs</p>
         <p>Exhaust Velocity: <span id="exhaustVelocity"></span> m/s</p>
         <p>Total Impulse: <span id="totalImpulse"></span> Ns</p>
+        <p>Mass Flow Rate: <span id="massFlowRate"></span> lbs/s</p>
+        <p>Time to Max Thrust: <span id="timeToMaxThrust"></span> s</p>
+        <p>Thrust Duration: <span id="thrustDuration"></span> s</p>
         <!-- You can include additional metrics here -->
     </div>
 
@@ -84,6 +88,13 @@
             }
         }
 
+        function removeLastDataPoint() {
+            data.labels.pop();
+            data.datasets[0].data.pop();
+
+            thrustChart.update();
+        }
+
         function calculateThrust() {
             var propMass = document.getElementById('propMassInput').value;
             var throatDiameter = document.getElementById('throatDiameterInput').value;
@@ -94,17 +105,28 @@
             var maxThrust = propMass * 9.81; // Assuming Earth's gravity
             var exhaustVelocity = Math.sqrt((2 * maxThrust) / (propMass * 0.453592)); // Convert lbs to kg
             var totalImpulse = maxThrust * parseFloat(data.labels[data.labels.length - 1]); // Max thrust * burn time
+            var massFlowRate = propMass / parseFloat(data.labels[data.labels.length - 1]);
+            
+            // Calculate time to max thrust
+            var timeToMaxThrust = parseFloat(data.labels[data.datasets[0].data.indexOf(Math.max(...data.datasets[0].data))]);
+
+            // Calculate thrust duration
+            var thrustDuration = parseFloat(data.labels[data.labels.length - 1]) - parseFloat(data.labels[0]);
 
             // Update the graph with calculated values
             document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
             document.getElementById('exhaustVelocity').textContent = exhaustVelocity.toFixed(2);
             document.getElementById('totalImpulse').textContent = totalImpulse.toFixed(2);
+            document.getElementById('massFlowRate').textContent = massFlowRate.toFixed(2);
+            document.getElementById('timeToMaxThrust').textContent = timeToMaxThrust.toFixed(2);
+            document.getElementById('thrustDuration').textContent = thrustDuration.toFixed(2);
 
             // You can also display these calculated values on the graph or elsewhere in the HTML
         }
     </script>
 </body>
 </html>
+
 
 
 
