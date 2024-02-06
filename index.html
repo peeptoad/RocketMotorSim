@@ -3,94 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rocket Engine Performance Analysis</title>
-    <!-- Import Chart.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <title>Rocket Engine Performance Analyzer</title>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Rocket Engine Performance Analysis</h1>
-    <!-- Canvas element for chart -->
-    <canvas id="rocketPerformanceChart" width="800" height="400"></canvas>
+    <h1>Rocket Engine Performance Analyzer</h1>
+    <div>
+        <label for="time">Time (seconds):</label>
+        <input type="number" id="time">
+        <label for="thrust">Thrust (lbs):</label>
+        <input type="number" id="thrust">
+        <button onclick="addData()">Add Data</button>
+    </div>
+    <div>
+        <canvas id="performanceChart" width="800" height="400"></canvas>
+    </div>
 
     <script>
-        // Define arrays to store data
-        let timeData = []; // Array to store time intervals
-        let thrustData = []; // Array to store thrust values
-        let weightData = []; // Array to store weight values
+        // Initialize arrays to store data
+        let times = [];
+        let thrusts = [];
 
         // Function to add data to arrays
-        function addData(time, thrust, weight) {
-            timeData.push(time);
-            thrustData.push(thrust);
-            weightData.push(weight);
+        function addData() {
+            let timeInput = document.getElementById('time').value;
+            let thrustInput = document.getElementById('thrust').value;
+            times.push(parseFloat(timeInput));
+            thrusts.push(parseFloat(thrustInput));
+            updateChart();
         }
 
-        // Function to generate graph
-        function generateGraph() {
-            // Get canvas element from HTML
-            const ctx = document.getElementById('rocketPerformanceChart').getContext('2d');
-
-            // Create chart object
-            const chart = new Chart(ctx, {
+        // Function to update the chart
+        function updateChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: timeData,
-                    datasets: [
-                        {
-                            label: 'Thrust',
-                            data: thrustData,
-                            borderColor: 'blue',
-                            fill: false
-                        },
-                        {
-                            label: 'Weight',
-                            data: weightData,
-                            borderColor: 'red',
-                            fill: false
-                        }
-                    ]
+                    labels: times,
+                    datasets: [{
+                        label: 'Thrust (lbs)',
+                        data: thrusts,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        borderWidth: 1
+                    }]
                 },
                 options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Rocket Engine Performance'
-                        },
-                    },
                     scales: {
                         x: {
+                            type: 'linear',
+                            position: 'bottom',
                             title: {
                                 display: true,
-                                text: 'Time (s)'
+                                text: 'Time (seconds)'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Force (N)'
+                                text: 'Thrust (lbs)'
                             }
                         }
                     }
                 }
             });
         }
-
-        // Example of adding data
-        addData(0, 1000, 500);
-        addData(1, 950, 480);
-        addData(2, 900, 460);
-        // Add more data as needed...
-
-        // Call the function to generate graph
-        generateGraph();
     </script>
 </body>
 </html>
-
-
-
-
 
 
 
