@@ -36,8 +36,8 @@
 
     <div id="metrics">
         <h2>Calculated Metrics</h2>
-        <p>Max Thrust: <span id="maxThrust"></span> N</p>
-        <p>Exhaust Velocity: <span id="exhaustVelocity"></span> mph</p>
+        <p>Max Thrust: <span id="maxThrust"></span> lbs</p>
+        <p>Exhaust Velocity: <span id="exhaustVelocity"></span> m/s</p>
         <p>Total Impulse: <span id="totalImpulse"></span> Ns</p>
         <p>Mass Flow Rate: <span id="massFlowRate"></span> g/s</p>
         <p>Time to Max Thrust: <span id="timeToMaxThrust"></span> s</p>
@@ -107,7 +107,7 @@
             // Perform calculations here and update the graph with the results
             // For simplicity, let's assume some basic calculations
             var maxThrust = propMassKg * 9.81; // Assuming Earth's gravity
-            var exhaustVelocity = Math.sqrt((2 * maxThrust) / propMassKg) * 2.23694; // Convert m/s to mph
+            var exhaustVelocity = Math.sqrt((2 * maxThrust) / propMassKg);
             var totalImpulse = maxThrust * parseFloat(data.labels[data.labels.length - 1]); // Max thrust * burn time
             var massFlowRate = propMassKg / parseFloat(data.labels[data.labels.length - 1]);
             
