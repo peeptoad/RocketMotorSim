@@ -19,8 +19,6 @@
     <input type="number" id="time">
   </div>
   
-  <!-- Add more input fields for other parameters -->
-
   <button onclick="addData()">Add Data Point</button>
 
   <canvas id="myChart" width="400" height="200"></canvas>
@@ -28,6 +26,7 @@
   <script>
     let weightData = [];
     let timeData = [];
+    let myChart;
 
     function addData() {
       const weightInput = document.getElementById('weight').value;
@@ -40,8 +39,12 @@
     }
 
     function updateChart() {
+      if (myChart) {
+        myChart.destroy();
+      }
+      
       const ctx = document.getElementById('myChart').getContext('2d');
-      const myChart = new Chart(ctx, {
+      myChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: timeData,
