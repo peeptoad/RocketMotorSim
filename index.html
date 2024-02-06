@@ -1,60 +1,78 @@
-<script>
-  let data = {
-    labels: [],
-    datasets: []
-  };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket Engine Thrust Analysis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Rocket Engine Thrust Analysis</h1>
+  
+  <div>
+    <label for="weight">Weight (lbs):</label>
+    <input type="number" id="weight">
+  </div>
+  
+  <div>
+    <label for="time">Time (s):</label>
+    <input type="number" id="time">
+  </div>
+  
+  <!-- Add more input fields for other parameters -->
 
-  let ctx = document.getElementById('thrustChart').getContext('2d');
-  let chart = new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      scales: {
-        x: {
-          type: 'linear',
-          position: 'bottom'
-        },
-        y: {
-          type: 'linear',
-          position: 'left'
-        }
-      },
-      elements: {
-        line: {
-          stepped: 'before'
-        }
-      }
+  <button onclick="addData()">Add Data Point</button>
+
+  <canvas id="myChart" width="400" height="200"></canvas>
+
+  <script>
+    let weightData = [];
+    let timeData = [];
+
+    function addData() {
+      const weightInput = document.getElementById('weight').value;
+      const timeInput = document.getElementById('time').value;
+
+      weightData.push(weightInput);
+      timeData.push(timeInput);
+
+      updateChart();
     }
-  });
 
-  function addData() {
-    let weight = parseFloat(document.getElementById('weight').value);
-    let time = parseFloat(document.getElementById('time').value);
-    let datasetIndex = chart.data.datasets.length - 1;
-
-    if (datasetIndex < 0 || time <= chart.data.labels[chart.data.labels.length - 1]) {
-      // Start a new dataset if none exist or time is less than the last point
-      datasetIndex++;
-      chart.data.datasets.push({
-        label: 'Thrust Curve ' + (datasetIndex + 1),
-        data: [],
-        borderColor: getRandomColor(),
-        borderWidth: 1,
-        fill: false,
-        stepped: 'before' // Set stepped interpolation for this dataset
+    function updateChart() {
+      const ctx = document.getElementById('myChart').getContext('2d');
+      const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: timeData,
+          datasets: [{
+            label: 'Weight over Time',
+            data: weightData,
+            borderColor: 'blue',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Time (s)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Weight (lbs)'
+              }
+            }
+          }
+        }
       });
     }
-
-    chart.data.labels.push(time);
-    chart.data.datasets[datasetIndex].data.push(weight);
-    chart.update();
-  }
-
-  function getRandomColor() {
-    // Generates a random hex color code
-    return '#' + Math.floor(Math.random() * 16777215).toString(16);
-  }
-</script>
+  </script>
+</body>
+</html>
 
 
 
