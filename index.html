@@ -1,88 +1,68 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rocket Engine Thrust Profile Analyzer</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket Engine Thrust Profile Analyzer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 </head>
 <body>
-    <h1>Rocket Engine Thrust Profile Analyzer</h1>
+  <h1>Rocket Engine Thrust Profile Analyzer</h1>
+  <form id="inputForm">
+    <label for="weight">Weight (lbs):</label>
+    <input type="number" id="weight" name="weight">
+    <label for="time">Time (s):</label>
+    <input type="number" id="time" name="time">
+    <!-- Add more input fields for additional engine data -->
+    <button type="button" onclick="addData()">Add Data Point</button>
+  </form>
+  <canvas id="thrustChart" width="800" height="400"></canvas>
 
-    <div id="dataPoints">
-        <!-- Data points will be dynamically added here -->
-    </div>
+  <script>
+    let data = {
+      labels: [],
+      datasets: [{
+        label: 'Weight over Time',
+        data: [],
+        borderColor: 'blue',
+        borderWidth: 1,
+        fill: false
+      }]
+    };
 
-    <button onclick="addDataPoint()">Add Data Point</button>
-
-    <canvas id="thrustProfile"></canvas>
-
-    <script>
-        let dataPoints = [];
-
-        function addDataPoint() {
-            const time = parseFloat(prompt("Enter time (s):"));
-            const thrust = parseFloat(prompt("Enter thrust (lbs):"));
-
-            dataPoints.push({ time, thrust });
-
-            updateGraph();
+    let ctx = document.getElementById('thrustChart').getContext('2d');
+    let chart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: {
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom'
+          },
+          y: {
+            type: 'linear',
+            position: 'left'
+          }
         }
+      }
+    });
 
-        function updateGraph() {
-            const burnTime = calculateBurnTime();
-            const ctx = document.getElementById('thrustProfile').getContext('2d');
+    function addData() {
+      let weight = parseFloat(document.getElementById('weight').value);
+      let time = parseFloat(document.getElementById('time').value);
+      chart.data.labels.push(time);
+      chart.data.datasets[0].data.push(weight);
+      chart.update();
+    }
 
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array.from({ length: burnTime + 1 }, (_, i) => i),
-                    datasets: [{
-                        label: 'Thrust Profile',
-                        data: calculateThrustProfile(burnTime),
-                        borderColor: 'blue',
-                        borderWidth: 1,
-                        fill: false
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Burn Time (s)'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Thrust (lbs)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
+    // Add functions for further calculations based on engine data
 
-        function calculateBurnTime() {
-            return Math.max(...dataPoints.map(point => point.time));
-        }
-
-        function calculateThrustProfile(burnTime) {
-            const thrustProfile = Array.from({ length: burnTime + 1 }, () => 0);
-
-            dataPoints.forEach(({ time, thrust }) => {
-                if (time <= burnTime) {
-                    thrustProfile[Math.round(time)] = thrust;
-                }
-            });
-
-            return thrustProfile;
-        }
-    </script>
+  </script>
 </body>
 </html>
+
+
 
 
 
