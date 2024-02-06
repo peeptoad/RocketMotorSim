@@ -64,24 +64,28 @@
         function incrementWeight(step) {
             weight += step;
             document.getElementById('weightValue').textContent = weight.toFixed(2);
+            addDataPoint();
         }
 
         function decrementWeight(step) {
             if (weight >= step) {
                 weight -= step;
                 document.getElementById('weightValue').textContent = weight.toFixed(2);
+                addDataPoint();
             }
         }
 
         function incrementTime(step) {
             time += step;
             document.getElementById('timeValue').textContent = time.toFixed(2);
+            addDataPoint();
         }
 
         function decrementTime(step) {
             if (time >= step) {
                 time -= step;
                 document.getElementById('timeValue').textContent = time.toFixed(2);
+                addDataPoint();
             }
         }
 
@@ -125,8 +129,6 @@
     </script>
 </body>
 </html>
-
-
 
 
 
