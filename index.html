@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Thrust Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div>
+        <label for="weightInput">Weight (lbs):</label>
+        <input type="number" id="weightInput" step="0.5" placeholder="Enter weight">
+        
+        <label for="timeInput">Time (seconds):</label>
+        <input type="number" id="timeInput" step="0.25" placeholder="Enter time">
+
+        <button onclick="addDataPoint()">Add Data Point</button>
+        <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
+        <button onclick="calculateMetrics()">Calculate Metrics</button>
+    </div>
+
+    <div id="header">
+        <h2>Date: <span id="date"></span></h2>
+        <h2>Propellant Type: <span id="propellantType"></span></h2>
+        <h2>Propellant Mass: <span id="propellantMass"></span> lbs</h2>
+        <h2>Nozzle Throat Diameter: <span id="throatDiameter"></span> inches</h2>
+    </div>
+
+    <canvas id="thrustChart" width="400" height="400"></canvas>
+
+    <div id="metrics">
+        <p>Total Impulse: <span id="totalImpulse"></span> Newton-seconds</p>
+        <p>Average Thrust: <span id="averageThrust"></span> lbs / <span id="averageThrustNewton"></span> Newtons</p>
+        <p>Max Thrust: <span id="maxThrust"></span> lbs</p>
+        <p>Time to Max Thrust: <span id="timeToMaxThrust"></span> seconds</p>
+        <p>Burnout Time: <span id="burnoutTime"></span> seconds</p>
+        <p>Thrust Duration: <span id="thrustDuration"></span> seconds</p>
+        <p>Area Under Curve: <span id="areaUnderCurve"></span> Newton-seconds</p>
+        <p>Exhaust Velocity: <span id="exhaustVelocity"></span> mph</p>
+    </div>
+
+    <script>
+        var date = prompt("Enter the date:");
+        var propellantType = prompt("Enter the propellant type:");
+        var propellantMass = prompt("Enter the propellant mass (lbs):");
+        var throatDiameter = prompt("Enter the nozzle throat diameter (inches):");
+
+        document.getElementById('date').innerText = date;
+        document.getElementById('propellantType').innerText = propellantType;
+        document.getElementById('propellantMass').innerText = propellantMass;
+        document.getElementById('throatDiameter').innerText = throatDiameter;
+
+        var data = {
+            labels: [],
+            datasets: [{
+                label: 'Thrust',
+                data: [],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        };
+
+        var options = {
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom'
+                },
+                y: {
+                    type: 'linear',
+                    position: 'left'
+                }
+            }
+        };
+
+        var ctx = document.getElementById('thrustChart').getContext('2d');
+        var thrustChart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: options
+        });
+
+        function addDataPoint() {
+            var weightInput = document.getElementById('weightInput').value;
+            var timeInput = document.getElementById('timeInput').value;
+
+            if (weightInput && timeInput) {
+                data.labels.push(timeInput);
+                data.datasets[0].data.push(parseFloat(weightInput));
+
+                thrustChart.update();
+            }
+        }
+
+        function removeLastDataPoint() {
+            if (data.labels.length > 0) {
+                data.labels.pop();
+                data.datasets[0].data.pop();
+                thrustChart.update();
+            }
+        }
+
+        function calculateMetrics() {
+            var totalImpulse = 0;
+            var maxThrust = 0;
+            var burnoutTime = 0;
+            var timeToMaxThrust = 0;
+
+            // Initialize previous time
+            var prevTime = 0;
+
+            for (var i = 0; i < data.labels.length; i++) {
+                var force = data.datasets[0].data[i];
+                var time = parseFloat(data.labels[i]);
+
+                // Update maximum thrust and time to max thrust
+                if (force > maxThrust) {
+                    maxThrust = force;
+                    timeToMaxThrust = time;
+                }
+
+                // Check for burnout time
+                if (force === 0 && prevTime !== 0) {
+                    burnoutTime = prevTime;
+                }
+
+                // Calculate total impulse only if there's thrust
+                if (force !== 0) {
+                    // Calculate time duration since the previous data point
+                    var deltaTime = time - prevTime;
+                    // Add to total impulse considering the force and time duration
+                    totalImpulse += force * deltaTime;
+                    // Update previous time
+                    prevTime = time;
+                }
+            }
+
+            // Calculate thrust duration
+            var thrustDuration = prevTime;
+
+            // Calculate average thrust
+            var averageThrust = totalImpulse / thrustDuration;
+
+            // Convert average thrust to Newtons
+            var averageThrustNewton = averageThrust * 4.44822;
+
+            // Calculate area under the thrust curve
+            var areaUnderCurve = totalImpulse;
+
+            // Calculate exhaust velocity in m/s
+            var nozzleExitArea = Math.PI * Math.pow(throatDiameter / 2, 2); // Assuming a circular nozzle
+            var ambientPressure = 101325; // Pa (standard atmospheric pressure)
+            var gasConstant = 287; // J/(kg·K) - specific gas constant for air
+            var massFlowRate = (ambientPressure * nozzleExitArea) / Math.sqrt(data.labels[data.labels.length - 1] * gasConstant);
+            var exhaustVelocity = totalImpulse / massFlowRate;
+
+            // Convert exhaust velocity to mph
+            var exhaustVelocityMph = exhaustVelocity * 2.23694; // 1 m/s = 2.23694 mph
+
+            // Display metrics
+            document.getElementById('totalImpulse').innerText = totalImpulse.toFixed(2);
+            document.getElementById('averageThrust').innerText = averageThrust.toFixed(2);
+            document.getElementById('averageThrustNewton').innerText = averageThrustNewton.toFixed(2);
+            document.getElementById('maxThrust').innerText = maxThrust.toFixed(2);
+            document.getElementById('timeToMaxThrust').innerText = timeToMaxThrust.toFixed(2);
+            document.getElementById('burnoutTime').innerText = burnoutTime.toFixed(2);
+            document.getElementById('thrustDuration').innerText = thrustDuration.toFixed(2);
+            document.getElementById('areaUnderCurve').innerText = areaUnderCurve.toFixed(2);
+            document.getElementById('exhaustVelocity').innerText = exhaustVelocityMph.toFixed(2);
+        }
+    </script>
+</body>
+</html>
