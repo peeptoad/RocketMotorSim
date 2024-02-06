@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,74 +10,40 @@
 <body>
     <h1>Rocket Engine Thrust Profile Analyzer</h1>
 
-    <label for="weight">Weight (lbs):</label>
-    <input type="number" id="weight">
-    <label for="time">Time (s):</label>
-    <input type="number" id="time">
-    <button onclick="addData()">Add Data Point</button>
+    <div id="dataPoints">
+        <!-- Data points will be dynamically added here -->
+    </div>
 
-    <label for="propellantMass">Initial Propellant Mass (lbs):</label>
-    <input type="number" id="propellantMass">
-    <label for="throatDiameter">Nozzle Throat Diameter (in):</label>
-    <input type="number" id="throatDiameter">
-    <label for="exitDiameter">Nozzle Exit Diameter (in):</label>
-    <input type="number" id="exitDiameter">
-
-    <label for="ejectionTime">Ejection Charge Time (s):</label>
-    <input type="number" id="ejectionTime">
-    <button onclick="addEjectionCharge()">Add Ejection Charge</button>
+    <button onclick="addDataPoint()">Add Data Point</button>
 
     <canvas id="thrustProfile"></canvas>
 
     <script>
-        let weights = [];
-        let times = [];
-        let ejectionTimes = [];
+        let dataPoints = [];
 
-        function addData() {
-            const weight = parseFloat(document.getElementById('weight').value);
-            const time = parseFloat(document.getElementById('time').value);
+        function addDataPoint() {
+            const time = parseFloat(prompt("Enter time (s):"));
+            const thrust = parseFloat(prompt("Enter thrust (lbs):"));
 
-            weights.push(weight);
-            times.push(time);
+            dataPoints.push({ time, thrust });
 
             updateGraph();
-        }
-
-        function addEjectionCharge() {
-            const ejectionTime = parseFloat(document.getElementById('ejectionTime').value);
-            ejectionTimes.push(ejectionTime);
-
-            updateGraph();
-        }
-
-        function calculateThrust() {
-            // Perform thrust calculations using weights, times, ejectionTimes,
-            // propellant mass, throat diameter, and exit diameter.
-            // You can access these arrays and input values here.
         }
 
         function updateGraph() {
+            const burnTime = calculateBurnTime();
             const ctx = document.getElementById('thrustProfile').getContext('2d');
+
             const chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: times,
+                    labels: Array.from({ length: burnTime + 1 }, (_, i) => i),
                     datasets: [{
-                        label: 'Weight over Time',
-                        data: weights,
+                        label: 'Thrust Profile',
+                        data: calculateThrustProfile(burnTime),
                         borderColor: 'blue',
                         borderWidth: 1,
                         fill: false
-                    }, {
-                        label: 'Ejection Charge',
-                        data: ejectionTimes.map(time => ({ x: time, y: 0 })),
-                        borderColor: 'red',
-                        pointBackgroundColor: 'red',
-                        pointRadius: 5,
-                        borderWidth: 1,
-                        fill: false,
-                        showLine: false
                     }]
                 },
                 options: {
@@ -84,20 +51,34 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Time (s)'
+                                text: 'Burn Time (s)'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Weight (lbs)'
+                                text: 'Thrust (lbs)'
                             }
                         }
                     }
                 }
             });
+        }
 
-            calculateThrust();
+        function calculateBurnTime() {
+            return Math.max(...dataPoints.map(point => point.time));
+        }
+
+        function calculateThrustProfile(burnTime) {
+            const thrustProfile = Array.from({ length: burnTime + 1 }, () => 0);
+
+            dataPoints.forEach(({ time, thrust }) => {
+                if (time <= burnTime) {
+                    thrustProfile[Math.round(time)] = thrust;
+                }
+            });
+
+            return thrustProfile;
         }
     </script>
 </body>
