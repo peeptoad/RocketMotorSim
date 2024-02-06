@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <canvas id="thrustChart" width="400" height="400"></canvas>
+
     <div>
         <label for="weightInput">Weight (lbs):</label>
         <input type="number" id="weightInput" step="0.5" placeholder="Enter weight">
@@ -15,44 +17,30 @@
         <input type="number" id="timeInput" step="0.25" placeholder="Enter time">
 
         <button onclick="addDataPoint()">Add Data Point</button>
-        <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
-        <button onclick="calculateMetrics()">Calculate Metrics</button>
     </div>
 
-    <div id="header">
-        <h2>Date: <span id="date"></span></h2>
-        <h2>Propellant Type: <span id="propellantType"></span></h2>
-        <h2>Propellant Mass: <span id="propellantMass"></span> lbs</h2>
-        <h2>Nozzle Throat Diameter: <span id="throatDiameter"></span> inches</h2>
-        <h2>Specific Impulse (Isp): <span id="specificImpulse"></span> seconds</h2>
-    </div>
+    <div>
+        <label for="propMassInput">Initial Propellant Mass (lbs):</label>
+        <input type="number" id="propMassInput" step="0.1" placeholder="Enter initial propellant mass">
+        
+        <label for="throatDiameterInput">Throat Diameter (in):</label>
+        <input type="number" id="throatDiameterInput" step="0.01" placeholder="Enter throat diameter">
 
-    <canvas id="thrustChart" width="400" height="400"></canvas>
+        <label for="exitDiameterInput">Nozzle Exit Diameter (in):</label>
+        <input type="number" id="exitDiameterInput" step="0.01" placeholder="Enter nozzle exit diameter">
+
+        <button onclick="calculateThrust()">Calculate Thrust</button>
+    </div>
 
     <div id="metrics">
-        <p>Total Impulse: <span id="totalImpulse"></span> Newton-seconds</p>
-        <p>Average Thrust: <span id="averageThrust"></span> lbs / <span id="averageThrustNewton"></span> Newtons</p>
+        <h2>Calculated Metrics</h2>
         <p>Max Thrust: <span id="maxThrust"></span> lbs</p>
-        <p>Time to Max Thrust: <span id="timeToMaxThrust"></span> seconds</p>
-        <p>Burnout Time: <span id="burnoutTime"></span> seconds</p>
-        <p>Thrust Duration: <span id="thrustDuration"></span> seconds</p>
-        <p>Area Under Curve: <span id="areaUnderCurve"></span> Newton-seconds</p>
-        <p>Max Exhaust Velocity: <span id="maxExhaustVelocity"></span> m/s</p>
+        <p>Exhaust Velocity: <span id="exhaustVelocity"></span> m/s</p>
+        <p>Total Impulse: <span id="totalImpulse"></span> Ns</p>
+        <!-- You can include additional metrics here -->
     </div>
 
     <script>
-        var date = prompt("Enter the date:");
-        var propellantType = prompt("Enter the propellant type:");
-        var propellantMass = prompt("Enter the propellant mass (lbs):");
-        var throatDiameter = prompt("Enter the nozzle throat diameter (inches):");
-        var specificImpulse = prompt("Enter the specific impulse (Isp) of the propellant (seconds):");
-
-        document.getElementById('date').innerText = date;
-        document.getElementById('propellantType').innerText = propellantType;
-        document.getElementById('propellantMass').innerText = propellantMass;
-        document.getElementById('throatDiameter').innerText = throatDiameter;
-        document.getElementById('specificImpulse').innerText = specificImpulse;
-
         var data = {
             labels: [],
             datasets: [{
@@ -96,58 +84,28 @@
             }
         }
 
-        function removeLastDataPoint() {
-            if (data.labels.length > 0) {
-                data.labels.pop();
-                data.datasets[0].data.pop();
-                thrustChart.update();
-            }
-        }
+        function calculateThrust() {
+            var propMass = document.getElementById('propMassInput').value;
+            var throatDiameter = document.getElementById('throatDiameterInput').value;
+            var exitDiameter = document.getElementById('exitDiameterInput').value;
 
-        function calculateMetrics() {
-            var totalImpulse = 0;
-            var maxThrust = 0;
-            var burnoutTime = parseFloat(data.labels[data.labels.length - 1]);
-            var timeToMaxThrust = 0;
-            var totalTime = burnoutTime;
+            // Perform calculations here and update the graph with the results
+            // For simplicity, let's assume some basic calculations
+            var maxThrust = propMass * 9.81; // Assuming Earth's gravity
+            var exhaustVelocity = Math.sqrt((2 * maxThrust) / (propMass * 0.453592)); // Convert lbs to kg
+            var totalImpulse = maxThrust * parseFloat(data.labels[data.labels.length - 1]); // Max thrust * burn time
 
-            for (var i = 1; i < data.labels.length; i++) {
-                var force = data.datasets[0].data[i];
-                var time = parseFloat(data.labels[i]);
+            // Update the graph with calculated values
+            document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
+            document.getElementById('exhaustVelocity').textContent = exhaustVelocity.toFixed(2);
+            document.getElementById('totalImpulse').textContent = totalImpulse.toFixed(2);
 
-                // Update maximum thrust and time to max thrust
-                if (force > maxThrust) {
-                    maxThrust = force;
-                    timeToMaxThrust = time;
-                }
-
-                // Calculate total impulse
-                var deltaTime = time - parseFloat(data.labels[i - 1]);
-                totalImpulse += (force + data.datasets[0].data[i - 1]) / 2 * deltaTime;
-
-                // Calculate total time
-                totalTime += deltaTime;
-            }
-
-            // Convert burnout time and time to max thrust to seconds
-            burnoutTime = parseFloat(burnoutTime);
-            timeToMaxThrust = parseFloat(timeToMaxThrust);
-
-            // Display metrics
-            document.getElementById('totalImpulse').innerText = totalImpulse.toFixed(2);
-            document.getElementById('maxThrust').innerText = maxThrust.toFixed(2);
-            document.getElementById('timeToMaxThrust').innerText = timeToMaxThrust.toFixed(2);
-            document.getElementById('burnoutTime').innerText = burnoutTime.toFixed(2);
-            document.getElementById('thrustDuration').innerText = totalTime.toFixed(2);
-
-            // Calculate and display max exhaust velocity in m/s
-            var massFlowRate = propellantMass / burnoutTime; // lbs/s
-            var maxExhaustVelocity = specificImpulse * 9.81; // m/s
-            document.getElementById('maxExhaustVelocity').innerText = maxExhaustVelocity.toFixed(2);
+            // You can also display these calculated values on the graph or elsewhere in the HTML
         }
     </script>
 </body>
 </html>
+
 
 
 
