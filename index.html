@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,6 +24,7 @@
         <h2>Propellant Type: <span id="propellantType"></span></h2>
         <h2>Propellant Mass: <span id="propellantMass"></span> lbs</h2>
         <h2>Nozzle Throat Diameter: <span id="throatDiameter"></span> inches</h2>
+        <h2>Specific Impulse (Isp): <span id="specificImpulse"></span> seconds</h2>
     </div>
 
     <canvas id="thrustChart" width="400" height="400"></canvas>
@@ -37,7 +37,7 @@
         <p>Burnout Time: <span id="burnoutTime"></span> seconds</p>
         <p>Thrust Duration: <span id="thrustDuration"></span> seconds</p>
         <p>Area Under Curve: <span id="areaUnderCurve"></span> Newton-seconds</p>
-        <p>Exhaust Velocity: <span id="exhaustVelocity"></span> mph</p>
+        <p>Max Exhaust Velocity: <span id="maxExhaustVelocity"></span> m/s</p>
     </div>
 
     <script>
@@ -45,11 +45,13 @@
         var propellantType = prompt("Enter the propellant type:");
         var propellantMass = prompt("Enter the propellant mass (lbs):");
         var throatDiameter = prompt("Enter the nozzle throat diameter (inches):");
+        var specificImpulse = prompt("Enter the specific impulse (Isp) of the propellant (seconds):");
 
         document.getElementById('date').innerText = date;
         document.getElementById('propellantType').innerText = propellantType;
         document.getElementById('propellantMass').innerText = propellantMass;
         document.getElementById('throatDiameter').innerText = throatDiameter;
+        document.getElementById('specificImpulse').innerText = specificImpulse;
 
         var data = {
             labels: [],
@@ -132,35 +134,23 @@
                 totalTime += deltaTime;
             }
 
-            // Calculate average thrust
-            var averageThrust = totalImpulse / totalTime;
-
-            // Convert average thrust to Newtons
-            var averageThrustNewton = averageThrust * 4.44822;
-
             // Convert burnout time and time to max thrust to seconds
             burnoutTime = parseFloat(burnoutTime);
             timeToMaxThrust = parseFloat(timeToMaxThrust);
 
             // Display metrics
             document.getElementById('totalImpulse').innerText = totalImpulse.toFixed(2);
-            document.getElementById('averageThrust').innerText = averageThrust.toFixed(2);
-            document.getElementById('averageThrustNewton').innerText = averageThrustNewton.toFixed(2);
             document.getElementById('maxThrust').innerText = maxThrust.toFixed(2);
             document.getElementById('timeToMaxThrust').innerText = timeToMaxThrust.toFixed(2);
             document.getElementById('burnoutTime').innerText = burnoutTime.toFixed(2);
             document.getElementById('thrustDuration').innerText = totalTime.toFixed(2);
 
-            // Calculate and display exhaust velocity in mph
-            var throatDiameterInch = parseFloat(document.getElementById('throatDiameter').innerText);
-            var nozzleExitArea = Math.PI * Math.pow(throatDiameterInch / 2, 2);
-            var ambientPressure = 101325; // Pa (standard atmospheric pressure)
-            var gasConstant = 287; // J/(kg·K) - specific gas constant for air
-            var massFlowRate = (ambientPressure * nozzleExitArea) / Math.sqrt(totalTime * gasConstant);
-            var exhaustVelocity = totalImpulse / massFlowRate;
-            var exhaustVelocityMph = exhaustVelocity * 2.23694; // 1 m/s = 2.23694 mph
-            document.getElementById('exhaustVelocity').innerText = exhaustVelocityMph.toFixed(2);
+            // Calculate and display max exhaust velocity in m/s
+            var maxExhaustVelocity = specificImpulse * 9.81; // m/s
+            document.getElementById('maxExhaustVelocity').innerText = maxExhaustVelocity.toFixed(2);
         }
     </script>
 </body>
 </html>
+
+
