@@ -16,7 +16,7 @@
   
   <div>
     <label for="time">Time (s):</label>
-    <input type="number" id="time">
+    <input type="number" id="time" min="1" max="10">
   </div>
   
   <button onclick="addData()">Add Data Point</button>
@@ -24,35 +24,31 @@
   <canvas id="myChart" width="400" height="200"></canvas>
 
   <script>
-    let weightData = [];
-    let timeData = [];
-    let myChart;
+    let weightData = new Array(10).fill(null);
 
     function addData() {
       const weightInput = document.getElementById('weight').value;
       const timeInput = document.getElementById('time').value;
 
-      weightData.push(weightInput);
-      timeData.push(timeInput);
+      weightData[timeInput - 1] = weightInput;
 
       updateChart();
     }
 
     function updateChart() {
-      if (myChart) {
-        myChart.destroy();
-      }
-      
       const ctx = document.getElementById('myChart').getContext('2d');
-      myChart = new Chart(ctx, {
+      const myChart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: timeData,
+          labels: Array.from({ length: 10 }, (_, i) => i + 1),
           datasets: [{
             label: 'Weight over Time',
             data: weightData,
             borderColor: 'blue',
-            borderWidth: 1
+            borderWidth: 1,
+            pointRadius: 5,
+            pointHoverRadius: 10,
+            fill: false
           }]
         },
         options: {
@@ -61,7 +57,10 @@
               title: {
                 display: true,
                 text: 'Time (s)'
-              }
+              },
+              min: 1,
+              max: 10,
+              stepSize: 1
             },
             y: {
               title: {
