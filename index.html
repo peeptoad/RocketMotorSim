@@ -96,14 +96,9 @@
             myChart.data.labels = [];
             myChart.data.datasets[0].data = [];
 
-            let startTime = dataPoints[0].time; // Start time from the first data point
-            let startThrust = 0; // Initial thrust value for each new data point
             for (let i = 0; i < dataPoints.length; i++) {
-                // Calculate time relative to the first data point
-                let time = dataPoints[i].time - startTime;
-                myChart.data.labels.push(time.toFixed(2)); // Round time to 2 decimal places
-                myChart.data.datasets[0].data.push(dataPoints[i].thrust - startThrust); // Adjust thrust relative to the start point
-                startThrust = dataPoints[i].thrust; // Update start thrust for the next data point
+                myChart.data.labels.push(dataPoints[i].time.toFixed(2)); // Round time to 2 decimal places
+                myChart.data.datasets[0].data.push(dataPoints[i].thrust);
             }
 
             myChart.update();
@@ -137,6 +132,3 @@
     </script>
 </body>
 </html>
-
-
-
