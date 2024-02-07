@@ -18,6 +18,14 @@
         <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
     </div>
     <div>
+        <label for="propellantMass">Propellant Mass (grams):</label>
+        <input type="number" id="propellantMass">
+        <label for="throatDiameter">Nozzle Throat Diameter (mm):</label>
+        <input type="number" id="throatDiameter">
+        <label for="exitDiameter">Nozzle Exit Diameter (mm):</label>
+        <input type="number" id="exitDiameter">
+    </div>
+    <div>
         <canvas id="performanceChart" width="800" height="400"></canvas>
     </div>
 
@@ -25,6 +33,11 @@
         // Initialize arrays to store data
         let times = [0]; // Initial data point at time 0
         let thrusts = [0]; // Initial data point at thrust 0
+
+        // Initialize variables for additional inputs
+        let propellantMass = 0;
+        let throatDiameter = 0;
+        let exitDiameter = 0;
 
         // Initialize chart
         const ctx = document.getElementById('performanceChart').getContext('2d');
@@ -74,6 +87,13 @@
             times.pop();
             thrusts.pop();
             myChart.update();
+        }
+
+        // Function to store additional input values
+        function storeAdditionalInputs() {
+            propellantMass = parseFloat(document.getElementById('propellantMass').value);
+            throatDiameter = parseFloat(document.getElementById('throatDiameter').value);
+            exitDiameter = parseFloat(document.getElementById('exitDiameter').value);
         }
     </script>
 </body>
