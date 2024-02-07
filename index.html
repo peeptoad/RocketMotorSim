@@ -10,7 +10,7 @@
 <body>
     <h1>Rocket Engine Performance Analyzer</h1>
     <div>
-        <label for="initialMass">Initial Propellant Mass:</label>
+        <label for="initialMass">Initial Propellant Mass (grams):</label>
         <select id="initialMass">
             <!-- Options will be dynamically generated using JavaScript -->
         </select>
@@ -44,6 +44,7 @@
         <p>Total Duration (seconds): <span id="totalDuration"></span></p>
         <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
         <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
+        <p>Mass Flow Rate (grams/second): <span id="massFlowRate"></span></p>
     </div>
 
     <script>
@@ -177,6 +178,14 @@
             return totalImpulse;
         }
 
+        // Function to calculate mass flow rate
+        function calculateMassFlowRate() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            let burnTime = calculateBurnTime();
+            if (burnTime === 0) return 0;
+            return (initialMass / burnTime).toFixed(2);
+        }
+
         // Function to calculate metrics and update UI
         function calculateMetrics() {
             let maxThrust = calculateMaxThrust();
@@ -192,6 +201,7 @@
             document.getElementById('totalDuration').textContent = calculateTotalDuration().toFixed(2);
             document.getElementById('totalImpulseLbs').textContent = totalImpulse.toFixed(2);
             document.getElementById('totalImpulseNewton').textContent = (totalImpulse * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('massFlowRate').textContent = calculateMassFlowRate();
         }
 
         // Generate options for initial propellant mass dropdown
@@ -205,5 +215,6 @@
     </script>
 </body>
 </html>
+
 
 
