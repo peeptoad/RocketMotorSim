@@ -34,17 +34,17 @@
 
     <script>
         // Initialize arrays to store data
-        let dataPoints = [{ time: 0, cumulativeThrust: 0 }];
+        let dataPoints = [];
 
         // Initialize chart
         const ctx = document.getElementById('performanceChart').getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [0], // Add initial label for the start point
+                labels: [],
                 datasets: [{
-                    label: 'Cumulative Thrust (lbs)',
-                    data: [0], // Add initial data point for the start point
+                    label: 'Thrust (lbs)',
+                    data: [],
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
                     borderWidth: 1
@@ -63,7 +63,7 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Cumulative Thrust (lbs)'
+                            text: 'Thrust (lbs)'
                         }
                     }
                 }
@@ -76,13 +76,9 @@
             let thrustInput = parseFloat(document.getElementById('thrust').value);
             let initialMass = parseFloat(document.getElementById('initialMass').value);
             
-            // Calculate cumulative thrust
-            let lastDataPoint = dataPoints[dataPoints.length - 1];
-            let cumulativeThrust = lastDataPoint.cumulativeThrust + timeInput * thrustInput;
-
             dataPoints.push({
-                time: lastDataPoint.time + timeInput,
-                cumulativeThrust: cumulativeThrust
+                time: timeInput,
+                thrust: thrustInput
             });
 
             updateChart();
@@ -100,13 +96,10 @@
             myChart.data.labels = [];
             myChart.data.datasets[0].data = [];
 
-            let startTime = dataPoints[0].time; // Start time from the first data point
-            let startCumulativeThrust = dataPoints[0].cumulativeThrust; // Start cumulative thrust from the first data point
+            let cumulativeThrust = 0;
             for (let i = 0; i < dataPoints.length; i++) {
-                // Calculate time relative to the first data point
-                let time = dataPoints[i].time - startTime;
-                let cumulativeThrust = dataPoints[i].cumulativeThrust - startCumulativeThrust; // Adjust cumulative thrust relative to the start point
-                myChart.data.labels.push(time.toFixed(2)); // Round time to 2 decimal places
+                myChart.data.labels.push(dataPoints[i].time.toFixed(2));
+                cumulativeThrust += dataPoints[i].thrust;
                 myChart.data.datasets[0].data.push(cumulativeThrust);
             }
 
@@ -120,7 +113,7 @@
 
             for (let i = 0; i < dataPoints.length - 1; i++) {
                 let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
-                let avgThrust = dataPoints[i].cumulativeThrust / timeInterval;
+                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
                 
                 totalImpulseLbs += avgThrust * timeInterval;
                 totalImpulseNewton += avgThrust * 4.44822 * timeInterval; // Convert lbs to Newton
