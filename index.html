@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocket Engine Performance Analyzer</title>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Rocket Engine Performance Analyzer</h1>
+    <div>
+        <label for="initialMass">Initial Propellant Mass (grams):</label>
+        <select id="initialMass">
+            <!-- Options will be dynamically generated using JavaScript -->
+        </select>
+    </div>
+    <div>
+        <label for="throatDiameter">Nozzle Throat Diameter (inches):</label>
+        <input type="number" id="throatDiameter">
+    </div>
+    <div>
+        <label for="exitDiameter">Nozzle Exit Diameter (inches):</label>
+        <input type="number" id="exitDiameter">
+    </div>
+    <div>
+        <label for="time">Time (seconds):</label>
+        <input type="number" id="time">
+        <label for="thrust">Thrust (lbs):</label>
+        <input type="number" id="thrust">
+        <button onclick="addData()">Add Data</button>
+    </div>
+    <div>
+        <label for="ejectionTime">Ejection Charge Time (seconds):</label>
+        <input type="number" id="ejectionTime">
+        <button onclick="addEjectionCharge()">Add Ejection Charge</button>
+    </div>
+    <div>
+        <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
+        <button onclick="calculateMetrics()">Calculate Metrics</button>
+    </div>
+    <div>
+        <canvas id="performanceChart" width="800" height="400"></canvas>
+    </div>
+    <div>
+        <p>Maximum Thrust (lbs): <span id="maxThrust"></span></p>
+        <p>Maximum Thrust (N): <span id="maxThrustNewton"></span></p>
+        <p>Average Thrust (lbs): <span id="averageThrust"></span></p>
+        <p>Average Thrust (N): <span id="averageThrustNewton"></span></p>
+        <p>Burn Time (seconds): <span id="burnTime"></span></p>
+        <p>Time from Burnout to Ejection (seconds): <span id="burnoutToEjectionTime"></span></p>
+        <p>Total Duration (seconds): <span id="totalDuration"></span></p>
+        <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
+        <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
+        <p>Mass Flow Rate (grams/second): <span id="massFlowRate"></span></p>
+        <p>Total Impulse per Unit Mass (N-sec/gram): <span id="totalImpulsePerUnitMass"></span></p>
+        <p>Specific Impulse (seconds): <span id="specificImpulse"></span></p>
+        <p>Thrust Coefficient: <span id="thrustCoefficient"></span></p>
+        <p>Exhaust Velocity (m/s): <span id="exhaustVelocity"></span></p>
+    </div>
+
+    <script>
+        // Initialize arrays to store data
+        let dataPoints = [{ time: 0, thrust: 0 }]; // Initial data point at (0, 0)
+
+        // Initialize chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['0'], // Initial label at 0
+                datasets: [{
+                    label: 'Thrust (lbs)',
+                    data: [0], // Initial data point at (0, 0)
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Thrust (lbs)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to add data to arrays and update chart
+        function addData() {
+            let timeInput = parseFloat(document.getElementById('time').value);
+            let thrustInput = parseFloat(document.getElementById('thrust').value);
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            
+            dataPoints.push({
+                time: timeInput,
+                thrust: thrustInput
+            });
+
+            updateChart();
+        }
+
+        // Function to add ejection charge data point
+        function addEjectionCharge() {
+            let ejectionTime = parseFloat(document.getElementById('ejectionTime').value);
+            
+            // Add ejection charge data point with 0 thrust
+            dataPoints.push({
+                time: ejectionTime,
+                thrust: 0
+            });
+
+            updateChart();
+        }
+
+        // Function to remove last data point from arrays and update chart
+        function removeLastDataPoint() {
+            dataPoints.pop();
+            updateChart();
+        }
+
+        // Function to update chart with current data points
+        function updateChart() {
+            // Reset chart data
+            myChart.data.labels = [];
+            myChart.data.datasets[0].data = [];
+
+            for (let i = 0; i < dataPoints.length; i++) {
+                myChart.data.labels.push(dataPoints[i].time.toFixed(2)); // Round time to 2 decimal places
+                myChart.data.datasets[0].data.push(dataPoints[i].thrust);
+            }
+
+            myChart.update();
+        }
+
+        // Function to calculate metrics and update UI
+        function calculateMetrics() {
+            let maxThrust = calculateMaxThrust();
+            let averageThrust = calculateAverageThrust();
+            let totalImpulse = calculateTotalImpulse();
+
+            document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
+            document.getElementById('maxThrustNewton').textContent = (maxThrust * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('averageThrust').textContent = averageThrust.toFixed(2);
+            document.getElementById('averageThrustNewton').textContent = (averageThrust * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('burnTime').textContent = calculateBurnTime().toFixed(2);
+            document.getElementById('burnoutToEjectionTime').textContent = calculateBurnoutToEjectionTime().toFixed(2);
+            document.getElementById('totalDuration').textContent = calculateTotalDuration().toFixed(2);
+            document.getElementById('totalImpulseLbs').textContent = totalImpulse.toFixed(2);
+            document.getElementById('totalImpulseNewton').textContent = (totalImpulse * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('massFlowRate').textContent = calculateMassFlowRate();
+            document.getElementById('totalImpulsePerUnitMass').textContent = calculateTotalImpulsePerUnitMass();
+            document.getElementById('specificImpulse').textContent = calculateSpecificImpulse();
+            document.getElementById('thrustCoefficient').textContent = calculateThrustCoefficient().toFixed(2);
+            document.getElementById('exhaustVelocity').textContent = calculateExhaustVelocity().toFixed(2);
+        }
+
+        // Function to calculate maximum thrust
+        function calculateMaxThrust() {
+            let maxThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                if (dataPoints[i].thrust > maxThrust) {
+                    maxThrust = dataPoints[i].thrust;
+                }
+            }
+            return maxThrust;
+        }
+
+        // Function to calculate average thrust
+        function calculateAverageThrust() {
+            let totalThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                totalThrust += dataPoints[i].thrust;
+            }
+            return totalThrust / dataPoints.length;
+        }
+
+        // Function to calculate burn time
+        function calculateBurnTime() {
+            return dataPoints[dataPoints.length - 2].time - dataPoints[0].time;
+        }
+
+        // Function to calculate time from burnout to ejection
+        function calculateBurnoutToEjectionTime() {
+            return dataPoints[dataPoints.length - 1].time - dataPoints[dataPoints.length - 2].time;
+        }
+
+        // Function to calculate total duration
+        function calculateTotalDuration() {
+            return dataPoints[dataPoints.length - 1].time;
+        }
+
+        // Function to calculate area under the curve (total impulse)
+        function calculateTotalImpulse() {
+            let totalImpulse = 0;
+            for (let i = 0; i < dataPoints.length - 1; i++) {
+                let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
+                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
+                totalImpulse += avgThrust * timeInterval;
+            }
+            return totalImpulse;
+        }
+
+        // Function to calculate mass flow rate based on burn time
+        function calculateMassFlowRate() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            let burnTime = calculateBurnTime();
+            if (burnTime === 0) return 0;
+            return (initialMass / burnTime).toFixed(2);
+        }
+
+        // Function to calculate total impulse per unit mass
+        function calculateTotalImpulsePerUnitMass() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            return (calculateTotalImpulse() / initialMass).toFixed(2);
+        }
+
+        // Function to calculate specific impulse
+        function calculateSpecificImpulse() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            let totalImpulse = calculateTotalImpulse();
+            return (totalImpulse / initialMass / 9.81).toFixed(2); // Convert total impulse from N-sec to kg*m/s^2 (N)
+        }
+
+        // Function to calculate thrust coefficient
+        function calculateThrustCoefficient() {
+            let throatDiameter = parseFloat(document.getElementById('throatDiameter').value) * 0.0254; // Convert inches to meters
+            let exitDiameter = parseFloat(document.getElementById('exitDiameter').value) * 0.0254; // Convert inches to meters
+            let throatArea = Math.PI * (throatDiameter / 2) ** 2;
+            let exitArea = Math.PI * (exitDiameter / 2) ** 2;
+            let pressureRatio = 1; // Assume ideal nozzle
+            let gamma = 1.4; // Assumed value for air
+            return (2 * exitArea / throatArea) * ((pressureRatio ** ((gamma - 1) / gamma) - 1) / (gamma - 1)) + (pressureRatio - 1) * (1 - exitArea / throatArea);
+        }
+
+        // Function to calculate exhaust velocity
+        function calculateExhaustVelocity() {
+            let throatDiameter = parseFloat(document.getElementById('throatDiameter').value) * 0.0254; // Convert inches to meters
+            let exitDiameter = parseFloat(document.getElementById('exitDiameter').value) * 0.0254; // Convert inches to meters
+            let throatArea = Math.PI * (throatDiameter / 2) ** 2;
+            let exitArea = Math.PI * (exitDiameter / 2) ** 2;
+            let gamma = 1.4; // Assumed value for air
+            let R = 287; // Specific gas constant for air (J/(kg*K))
+            let chamberTemperature = 3000; // Assumed combustion chamber temperature (K)
+            let chamberPressure = 1000000; // Assumed combustion chamber pressure (Pa)
+            let exitPressure = 100000; // Assumed exit pressure (Pa)
+            return Math.sqrt((2 * gamma) / (gamma - 1) * R * chamberTemperature * (1 - (exitPressure / chamberPressure) ** ((gamma - 1) / gamma)));
+        }
+
+        // Generate options for initial propellant mass dropdown
+        const initialMassDropdown = document.getElementById('initialMass');
+        for (let i = 1; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} grams`;
+            initialMassDropdown.appendChild(option);
+        }
+    </script>
+</body>
+</html>
 
