@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,21 +22,17 @@
         <input type="number" id="thrust">
         <button onclick="addData()">Add Data</button>
         <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
+        <button onclick="calculateMetrics()">Calculate Metrics</button>
     </div>
     <div>
         <canvas id="performanceChart" width="800" height="400"></canvas>
     </div>
+    <div>
+        <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
+        <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
+    </div>
 
     <script>
-        // Generate options for initial propellant mass dropdown
-        const initialMassDropdown = document.getElementById('initialMass');
-        for (let i = 1; i <= 100; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `${i} grams`;
-            initialMassDropdown.appendChild(option);
-        }
-
         // Initialize arrays to store data
         let dataPoints = [];
 
@@ -114,6 +109,32 @@
             }
 
             myChart.update();
+        }
+
+        // Function to calculate total impulse
+        function calculateMetrics() {
+            let totalImpulseLbs = 0;
+            let totalImpulseNewton = 0;
+
+            for (let i = 0; i < dataPoints.length - 1; i++) {
+                let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
+                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
+                
+                totalImpulseLbs += avgThrust * timeInterval;
+                totalImpulseNewton += avgThrust * 4.44822 * timeInterval; // Convert lbs to Newton
+            }
+
+            document.getElementById('totalImpulseLbs').textContent = totalImpulseLbs.toFixed(2);
+            document.getElementById('totalImpulseNewton').textContent = totalImpulseNewton.toFixed(2);
+        }
+
+        // Generate options for initial propellant mass dropdown
+        const initialMassDropdown = document.getElementById('initialMass');
+        for (let i = 1; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} grams`;
+            initialMassDropdown.appendChild(option);
         }
     </script>
 </body>
