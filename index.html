@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,6 +36,9 @@
         <canvas id="performanceChart" width="800" height="400"></canvas>
     </div>
     <div>
+        <p>Maximum Thrust (lbs): <span id="maxThrust"></span></p>
+        <p>Average Thrust (lbs): <span id="averageThrust"></span></p>
+        <p>Burn Time (seconds): <span id="burnTime"></span></p>
         <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
         <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
     </div>
@@ -124,21 +128,49 @@
             myChart.update();
         }
 
-        // Function to calculate total impulse
-        function calculateMetrics() {
-            let totalImpulseLbs = 0;
-            let totalImpulseNewton = 0;
+        // Function to calculate maximum thrust
+        function calculateMaxThrust() {
+            let maxThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                if (dataPoints[i].thrust > maxThrust) {
+                    maxThrust = dataPoints[i].thrust;
+                }
+            }
+            return maxThrust;
+        }
 
+        // Function to calculate average thrust
+        function calculateAverageThrust() {
+            let totalThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                totalThrust += dataPoints[i].thrust;
+            }
+            return totalThrust / dataPoints.length;
+        }
+
+        // Function to calculate burn time
+        function calculateBurnTime() {
+            return dataPoints[dataPoints.length - 1].time - dataPoints[0].time;
+        }
+
+        // Function to calculate area under the curve (total impulse)
+        function calculateTotalImpulse() {
+            let totalImpulse = 0;
             for (let i = 0; i < dataPoints.length - 1; i++) {
                 let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
                 let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
-                
-                totalImpulseLbs += avgThrust * timeInterval;
-                totalImpulseNewton += avgThrust * 4.44822 * timeInterval; // Convert lbs to Newton
+                totalImpulse += avgThrust * timeInterval;
             }
+            return totalImpulse;
+        }
 
-            document.getElementById('totalImpulseLbs').textContent = totalImpulseLbs.toFixed(2);
-            document.getElementById('totalImpulseNewton').textContent = totalImpulseNewton.toFixed(2);
+        // Function to calculate metrics and update UI
+        function calculateMetrics() {
+            document.getElementById('maxThrust').textContent = calculateMaxThrust().toFixed(2);
+            document.getElementById('averageThrust').textContent = calculateAverageThrust().toFixed(2);
+            document.getElementById('burnTime').textContent = calculateBurnTime().toFixed(2);
+            document.getElementById('totalImpulseLbs').textContent = calculateTotalImpulse().toFixed(2);
+            document.getElementById('totalImpulseNewton').textContent = (calculateTotalImpulse() * 4.44822).toFixed(2);
         }
 
         // Generate options for initial propellant mass dropdown
@@ -152,5 +184,4 @@
     </script>
 </body>
 </html>
-
 
