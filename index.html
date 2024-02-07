@@ -94,6 +94,24 @@
             }
         });
 
+        // Generate options for initial propellant mass dropdown
+        const initialPropellantMassDropdown = document.getElementById('initialPropellantMass');
+        for (let i = 1; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} grams`;
+            initialPropellantMassDropdown.appendChild(option);
+        }
+
+        // Generate options for initial rocket mass dropdown
+        const initialRocketMassDropdown = document.getElementById('initialRocketMass');
+        for (let i = 0; i <= 5000; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} grams`;
+            initialRocketMassDropdown.appendChild(option);
+        }
+        
         // Function to add data to arrays and update chart
         function addData() {
             let timeInput = parseFloat(document.getElementById('time').value);
@@ -173,3 +191,4 @@
     </script>
 </body>
 </html>
+
