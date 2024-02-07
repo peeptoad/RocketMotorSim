@@ -40,16 +40,6 @@
         const Cd = 0.75; // Drag coefficient
         const airDensity0 = 1.225; // Air density at sea level (kg/m^3)
 
-        // Rocket properties
-        let initialRocketMass = 1000; // Initial rocket mass (kg)
-        let initialPropellantMass = 500; // Initial propellant mass (kg)
-        let rocketDiameter = 0.2; // Rocket diameter (m)
-        let rocketLength = 2.0; // Rocket length (m)
-
-        // Simulation parameters
-        const totalTime = 60; // Total simulation time (seconds)
-        const timeStep = 0.1; // Time step for numerical integration (seconds)
-
         // Function to calculate air density at a given altitude
         function calculateAirDensity(altitude) {
             return airDensity0 * Math.exp(-altitude / 8500);
@@ -58,12 +48,18 @@
         // Function to calculate drag force
         function calculateDragForce(velocity, altitude) {
             const airDensity = calculateAirDensity(altitude);
+            const rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value) * 0.0254; // Convert inches to meters
             const rocketArea = Math.PI * Math.pow((rocketDiameter / 2), 2); // Cross-sectional area of the rocket (m^2)
             return 0.5 * Cd * airDensity * Math.pow(velocity, 2) * rocketArea;
         }
 
         // Function to simulate rocket trajectory using Runge-Kutta 4th order method
         function simulateRocketTrajectory() {
+            const initialRocketMass = parseFloat(document.getElementById('initialRocketMass').value) / 1000; // Convert grams to kilograms
+            const initialPropellantMass = parseFloat(document.getElementById('initialPropellantMass').value) / 1000; // Convert grams to kilograms
+            const totalTime = 60; // Total simulation time (seconds)
+            const timeStep = 0.1; // Time step for numerical integration (seconds)
+
             let time = 0; // Initialize time
             let rocketMass = initialRocketMass + initialPropellantMass; // Total rocket mass (kg)
             let velocity = 0; // Initialize velocity
@@ -169,6 +165,7 @@
     </script>
 </body>
 </html>
+
 
 
 
