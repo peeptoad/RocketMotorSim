@@ -77,11 +77,11 @@
             let initialMass = parseFloat(document.getElementById('initialMass').value);
             
             // Calculate cumulative thrust
-            let cumulativeThrust = dataPoints.length === 0 ? 0 : dataPoints[dataPoints.length - 1].cumulativeThrust;
-            cumulativeThrust += timeInput * thrustInput;
+            let lastDataPoint = dataPoints[dataPoints.length - 1];
+            let cumulativeThrust = lastDataPoint.cumulativeThrust + timeInput * thrustInput;
 
             dataPoints.push({
-                time: timeInput,
+                time: lastDataPoint.time + timeInput,
                 cumulativeThrust: cumulativeThrust
             });
 
