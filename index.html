@@ -50,11 +50,18 @@
     </div>
     <hr>
     <div>
-        <h2>Flight Profile</h2>
-        <button onclick="determineFlightProfile()">Calculate Flight Profile</button>
-        <div id="flightProfileResults">
-            <!-- Flight profile results will be displayed here -->
-        </div>
+        <h2>Flight Simulator</h2>
+        <label for="rocketWeight">Rocket Weight (lbs):</label>
+        <input type="number" id="rocketWeight">
+        <label for="rocketDiameter">Rocket Diameter (inches):</label>
+        <input type="number" id="rocketDiameter">
+        <label for="rocketLength">Rocket Length (inches):</label>
+        <input type="number" id="rocketLength">
+        <!-- Additional inputs and options can be added here -->
+        <button onclick="simulateFlight()">Simulate Flight</button>
+    </div>
+    <div id="flightResults">
+        <!-- Flight simulation results will be displayed here -->
     </div>
 
     <script>
@@ -142,27 +149,110 @@
             myChart.update();
         }
 
+        // Function to calculate maximum thrust
+        function calculateMaxThrust() {
+            let maxThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                if (dataPoints[i].thrust > maxThrust) {
+                    maxThrust = dataPoints[i].thrust;
+                }
+            }
+            return maxThrust;
+        }
+
+        // Function to calculate average thrust
+        function calculateAverageThrust() {
+            let totalThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                totalThrust += dataPoints[i].thrust;
+            }
+            return totalThrust / dataPoints.length;
+        }
+
+        // Function to calculate burn time
+        function calculateBurnTime() {
+            return dataPoints[dataPoints.length - 1].time - dataPoints[0].time;
+        }
+
+        // Function to calculate time from burnout to ejection
+        function calculateBurnoutToEjectionTime() {
+            return dataPoints[dataPoints.length - 1].time - dataPoints[dataPoints.length - 2].time;
+        }
+
+        // Function to calculate total duration
+        function calculateTotalDuration() {
+            return dataPoints[dataPoints.length - 1].time;
+        }
+
+        // Function to calculate area under the curve (total impulse)
+        function calculateTotalImpulse() {
+            let totalImpulse = 0;
+            for (let i = 0; i < dataPoints.length - 1; i++) {
+                let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
+                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
+                totalImpulse += avgThrust * timeInterval;
+            }
+            return totalImpulse;
+        }
+
+        // Function to calculate mass flow rate
+        function calculateMassFlowRate() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            let burnTime = calculateBurnTime();
+            if (burnTime === 0) return 0;
+            return (initialMass / burnTime).toFixed(2);
+        }
+
+        // Function to calculate total impulse per unit mass
+        function calculateTotalImpulsePerUnitMass() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            return (calculateTotalImpulse() / initialMass).toFixed(2);
+        }
+
+        // Function to calculate specific impulse
+        function calculateSpecificImpulse() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            return (calculateTotalImpulse() / initialMass).toFixed(2);
+        }
+
         // Function to calculate metrics and update UI
         function calculateMetrics() {
-            // Calculate metrics (example calculations)
             let maxThrust = calculateMaxThrust();
             let averageThrust = calculateAverageThrust();
-            let burnTime = calculateBurnTime();
-            let totalDuration = calculateTotalDuration();
             let totalImpulse = calculateTotalImpulse();
-            let massFlowRate = calculateMassFlowRate();
-            let totalImpulsePerUnitMass = calculateTotalImpulsePerUnitMass();
-            let specificImpulse = calculateSpecificImpulse();
 
-            // Update UI with calculated metrics
             document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
+            document.getElementById('maxThrustNewton').textContent = (maxThrust * 4.44822).toFixed(2); // Convert lbs to Newton
             document.getElementById('averageThrust').textContent = averageThrust.toFixed(2);
-            document.getElementById('burnTime').textContent = burnTime.toFixed(2);
-            document.getElementById('totalDuration').textContent = totalDuration.toFixed(2);
+            document.getElementById('averageThrustNewton').textContent = (averageThrust * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('burnTime').textContent = calculateBurnTime().toFixed(2);
+            document.getElementById('burnoutToEjectionTime').textContent = calculateBurnoutToEjectionTime().toFixed(2);
+            document.getElementById('totalDuration').textContent = calculateTotalDuration().toFixed(2);
             document.getElementById('totalImpulseLbs').textContent = totalImpulse.toFixed(2);
-            document.getElementById('massFlowRate').textContent = massFlowRate.toFixed(2);
-            document.getElementById('totalImpulsePerUnitMass').textContent = totalImpulsePerUnitMass.toFixed(2);
-            document.getElementById('specificImpulse').textContent = specificImpulse.toFixed(2);
+            document.getElementById('totalImpulseNewton').textContent = (totalImpulse * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('massFlowRate').textContent = calculateMassFlowRate();
+            document.getElementById('totalImpulsePerUnitMass').textContent = calculateTotalImpulsePerUnitMass();
+            document.getElementById('specificImpulse').textContent = calculateSpecificImpulse();
+        }
+
+        // Function to simulate flight
+        function simulateFlight() {
+            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
+            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value);
+            let rocketLength = parseFloat(document.getElementById('rocketLength').value);
+            
+            // Additional flight simulation logic can be added here
+            let flightResults = document.getElementById('flightResults');
+            flightResults.innerHTML = `
+                <h3>Flight Simulation Results</h3>
+                <p>Rocket Weight: ${rocketWeight} lbs</p>
+                <p>Rocket Diameter: ${rocketDiameter} inches</p>
+                <p>Rocket Length: ${rocketLength} inches</p>
+                <!-- Add more flight simulation results here -->
+            `;
+
+            // Call function to determine flight profile
+            determineFlightProfile();
         }
 
         // Function to determine flight profile
@@ -212,9 +302,10 @@
             // Calculate descent velocity
             let descentVelocity = gravity * descentTime; // in ft/s
 
-            // Display flight profile results
-            let flightProfileResults = document.getElementById('flightProfileResults');
-            flightProfileResults.innerHTML = `
+            // Output flight profile information
+            let flightResults = document.getElementById('flightResults');
+            flightResults.innerHTML += `
+                <h3>Flight Profile</h3>
                 <p>Max Altitude During Burn Phase: ${maxAltitudeBurn.toFixed(2)} feet</p>
                 <p>Max Velocity During Burn Phase: ${maxVelocityBurn.toFixed(2)} ft/s</p>
                 <p>Time to Apogee (from Burnout): ${timeToApogee.toFixed(2)} seconds</p>
@@ -225,69 +316,16 @@
             `;
         }
 
-        // Function to calculate maximum thrust
-        function calculateMaxThrust() {
-            let maxThrust = 0;
-            for (let i = 0; i < dataPoints.length; i++) {
-                if (dataPoints[i].thrust > maxThrust) {
-                    maxThrust = dataPoints[i].thrust;
-                }
-            }
-            return maxThrust;
-        }
-
-        // Function to calculate average thrust
-        function calculateAverageThrust() {
-            let totalThrust = 0;
-            for (let i = 0; i < dataPoints.length; i++) {
-                totalThrust += dataPoints[i].thrust;
-            }
-            return totalThrust / dataPoints.length;
-        }
-
-        // Function to calculate burn time
-        function calculateBurnTime() {
-            return dataPoints[dataPoints.length - 1].time;
-        }
-
-        // Function to calculate total duration
-        function calculateTotalDuration() {
-            return dataPoints[dataPoints.length - 1].time;
-        }
-
-        // Function to calculate total impulse
-        function calculateTotalImpulse() {
-            let totalImpulse = 0;
-            for (let i = 0; i < dataPoints.length - 1; i++) {
-                let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
-                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
-                totalImpulse += avgThrust * timeInterval;
-            }
-            return totalImpulse;
-        }
-
-        // Function to calculate mass flow rate
-        function calculateMassFlowRate() {
-            let initialMass = parseFloat(document.getElementById('initialMass').value);
-            let burnTime = calculateBurnTime();
-            if (burnTime === 0) return 0;
-            return (initialMass / burnTime).toFixed(2);
-        }
-
-        // Function to calculate total impulse per unit mass
-        function calculateTotalImpulsePerUnitMass() {
-            let initialMass = parseFloat(document.getElementById('initialMass').value);
-            return (calculateTotalImpulse() / initialMass).toFixed(2);
-        }
-
-        // Function to calculate specific impulse
-        function calculateSpecificImpulse() {
-            let initialMass = parseFloat(document.getElementById('initialMass').value);
-            return (calculateTotalImpulse() / initialMass).toFixed(2);
+        // Generate options for initial propellant mass dropdown
+        const initialMassDropdown = document.getElementById('initialMass');
+        for (let i = 1; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} grams`;
+            initialMassDropdown.appendChild(option);
         }
     </script>
 </body>
 </html>
-
 
 
