@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +36,9 @@
     </div>
     <div>
         <p>Maximum Thrust (lbs): <span id="maxThrust"></span></p>
+        <p>Maximum Thrust (N): <span id="maxThrustNewton"></span></p>
         <p>Average Thrust (lbs): <span id="averageThrust"></span></p>
+        <p>Average Thrust (N): <span id="averageThrustNewton"></span></p>
         <p>Burn Time (seconds): <span id="burnTime"></span></p>
         <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
         <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
@@ -166,11 +167,17 @@
 
         // Function to calculate metrics and update UI
         function calculateMetrics() {
-            document.getElementById('maxThrust').textContent = calculateMaxThrust().toFixed(2);
-            document.getElementById('averageThrust').textContent = calculateAverageThrust().toFixed(2);
+            let maxThrust = calculateMaxThrust();
+            let averageThrust = calculateAverageThrust();
+            let totalImpulse = calculateTotalImpulse();
+
+            document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
+            document.getElementById('maxThrustNewton').textContent = (maxThrust * 4.44822).toFixed(2); // Convert lbs to Newton
+            document.getElementById('averageThrust').textContent = averageThrust.toFixed(2);
+            document.getElementById('averageThrustNewton').textContent = (averageThrust * 4.44822).toFixed(2); // Convert lbs to Newton
             document.getElementById('burnTime').textContent = calculateBurnTime().toFixed(2);
-            document.getElementById('totalImpulseLbs').textContent = calculateTotalImpulse().toFixed(2);
-            document.getElementById('totalImpulseNewton').textContent = (calculateTotalImpulse() * 4.44822).toFixed(2);
+            document.getElementById('totalImpulseLbs').textContent = totalImpulse.toFixed(2);
+            document.getElementById('totalImpulseNewton').textContent = (totalImpulse * 4.44822).toFixed(2); // Convert lbs to Newton
         }
 
         // Generate options for initial propellant mass dropdown
@@ -184,4 +191,5 @@
     </script>
 </body>
 </html>
+
 
