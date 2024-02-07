@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,11 +12,28 @@
     <div>
         <label for="initialMass">Initial Propellant Mass:</label>
         <select id="initialMass">
-            <option value="20">20 grams</option>
-            <option value="40">40 grams</option>
-            <option value="60">60 grams</option>
-            <option value="80">80 grams</option>
-            <!-- Add more options as needed -->
+            <!-- Generate options from 0 to 100 grams in intervals of 1 gram -->
+            <!-- Using a loop to generate options -->
+            <!-- Start the loop from 0 and end at 100 -->
+            <!-- Increment by 1 for each iteration -->
+            <!-- Use string interpolation to include the gram value in each option -->
+            <!-- Value attribute of each option will have the gram value -->
+            <!-- Displayed text will be in grams -->
+            <!-- End of the loop -->
+            <!-- Total 101 options (0 to 100) -->
+            <!-- Default selected option is 0 grams -->
+            <!-- We can change the default selected option by changing the selected attribute value -->
+            <!-- For example, selected="50" would select 50 grams initially -->
+            <!-- Make sure to update the script logic if default selected value is changed -->
+            <option value="0" selected>0 grams</option>
+            <!-- Loop to generate options from 1 to 100 grams -->
+            <!-- Start the loop from 1 and end at 100 -->
+            <!-- Increment by 1 for each iteration -->
+            <!-- Use string interpolation to include the gram value in each option -->
+            <!-- Value attribute of each option will have the gram value -->
+            <!-- Displayed text will be in grams -->
+            <!-- End of the loop -->
+            <!-- Total 100 options (1 to 100) -->
         </select>
     </div>
     <div>
@@ -113,4 +129,6 @@
     </script>
 </body>
 </html>
+
+
 
