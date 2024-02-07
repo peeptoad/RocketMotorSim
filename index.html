@@ -48,20 +48,6 @@
         <p>Total Impulse per Unit Mass (N-sec/gram): <span id="totalImpulsePerUnitMass"></span></p>
         <p>Specific Impulse (seconds): <span id="specificImpulse"></span></p>
     </div>
-    <hr>
-    <div>
-        <h2>Flight Simulator</h2>
-        <label for="rocketWeight">Rocket Weight (lbs):</label>
-        <input type="number" id="rocketWeight">
-        <label for="rocketDiameter">Rocket Diameter (inches):</label>
-        <input type="number" id="rocketDiameter">
-        <label for="rocketLength">Rocket Length (inches):</label>
-        <input type="number" id="rocketLength">
-        <button onclick="simulateFlight()">Simulate Flight</button>
-    </div>
-    <div id="flightResults">
-        <!-- Flight simulation results will be displayed here -->
-    </div>
 
     <script>
         // Initialize arrays to store data
@@ -194,7 +180,7 @@
             return totalImpulse;
         }
 
-        // Function to calculate mass flow rate
+        // Function to calculate mass flow rate based on burn time
         function calculateMassFlowRate() {
             let initialMass = parseFloat(document.getElementById('initialMass').value);
             let burnTime = calculateBurnTime();
@@ -232,84 +218,6 @@
             document.getElementById('massFlowRate').textContent = calculateMassFlowRate();
             document.getElementById('totalImpulsePerUnitMass').textContent = calculateTotalImpulsePerUnitMass();
             document.getElementById('specificImpulse').textContent = calculateSpecificImpulse();
-        }
-
-        // Function to simulate flight
-        function simulateFlight() {
-            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
-            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value);
-            let rocketLength = parseFloat(document.getElementById('rocketLength').value);
-            
-            // Additional flight simulation logic can be added here
-            let flightResults = document.getElementById('flightResults');
-            flightResults.innerHTML = `
-                <h3>Flight Simulation Results</h3>
-                <p>Rocket Weight: ${rocketWeight} lbs</p>
-                <p>Rocket Diameter: ${rocketDiameter} inches</p>
-                <p>Rocket Length: ${rocketLength} inches</p>
-                <!-- Add more flight simulation results here -->
-            `;
-
-            // Call function to determine flight profile
-            determineFlightProfile();
-        }
-
-        // Function to determine flight profile
-        function determineFlightProfile() {
-            // Get data from engine performance analysis
-            let maxThrust = parseFloat(document.getElementById('maxThrust').textContent);
-            let totalImpulse = parseFloat(document.getElementById('totalImpulseLbs').textContent);
-            let burnTime = parseFloat(document.getElementById('burnTime').textContent);
-
-            // Get data from rocket specifications
-            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value); // in lbs
-            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value); // in inches
-            let rocketLength = parseFloat(document.getElementById('rocketLength').value); // in inches
-
-            // Environmental factors (you can adjust these as needed)
-            let airDensity = 0.00237; // in slugs/ft^3 (standard air density at sea level)
-            let dragCoefficient = 0.75; // typical drag coefficient for rockets
-            let gravity = 32.17; // gravitational acceleration at sea level in ft/s^2
-
-            // Calculate cross-sectional area of the rocket (assuming cylindrical shape)
-            let crossSectionalArea = Math.PI * Math.pow(rocketDiameter / 2, 2); // in square inches
-
-            // Calculate acceleration during burn phase
-            let acceleration = maxThrust / rocketWeight; // in ft/s^2
-
-            // Calculate maximum altitude reached during burn phase (ignoring drag initially)
-            let maxAltitudeBurn = (acceleration * Math.pow(burnTime, 2)) / 8; // in feet
-
-            // Calculate maximum velocity reached during burn phase (ignoring drag initially)
-            let maxVelocityBurn = acceleration * burnTime; // in ft/s
-
-            // Calculate time to apogee (ignoring drag initially)
-            let timeToApogee = Math.sqrt((2 * maxAltitudeBurn) / gravity); // in seconds
-
-            // Calculate time from burnout to apogee
-            let timeFromBurnoutToApogee = timeToApogee - burnTime; // in seconds
-
-            // Calculate apogee altitude accounting for drag during coast phase
-            let apogeeAltitude = (maxVelocityBurn * timeFromBurnoutToApogee) - ((gravity * Math.pow(timeFromBurnoutToApogee, 2)) / 8); // in feet
-
-            // Calculate descent time (assuming free fall)
-            let descentTime = Math.sqrt((2 * apogeeAltitude) / gravity); // in seconds
-
-            // Calculate descent velocity
-            let descentVelocity = gravity * descentTime; // in ft/s
-
-            // Output flight profile information
-            let flightResults = document.getElementById('flightResults');
-            flightResults.innerHTML += `
-                <h3>Flight Profile</h3>
-                <p>Max Altitude During Burn Phase: ${maxAltitudeBurn.toFixed(2)} feet</p>
-                <p>Max Velocity During Burn Phase: ${maxVelocityBurn.toFixed(2)} ft/s</p>
-                <p>Time to Apogee (from Burnout): ${timeToApogee.toFixed(2)} seconds</p>
-                <p>Time from Burnout to Apogee: ${timeFromBurnoutToApogee.toFixed(2)} seconds</p>
-                <p>Apogee Altitude (including drag during coast phase): ${apogeeAltitude.toFixed(2)} feet</p>
-                <p>Descent Time (from apogee to ground): ${descentTime.toFixed(2)} seconds</p>
-                <p>Descent Velocity (at ground impact): ${descentVelocity.toFixed(2)} ft/s</p>
-            `;
         }
 
         // Generate options for initial propellant mass dropdown
