@@ -21,19 +21,6 @@
             <!-- Displayed text will be in grams -->
             <!-- End of the loop -->
             <!-- Total 101 options (0 to 100) -->
-            <!-- Default selected option is 0 grams -->
-            <!-- We can change the default selected option by changing the selected attribute value -->
-            <!-- For example, selected="50" would select 50 grams initially -->
-            <!-- Make sure to update the script logic if default selected value is changed -->
-            <option value="0" selected>0 grams</option>
-            <!-- Loop to generate options from 1 to 100 grams -->
-            <!-- Start the loop from 1 and end at 100 -->
-            <!-- Increment by 1 for each iteration -->
-            <!-- Use string interpolation to include the gram value in each option -->
-            <!-- Value attribute of each option will have the gram value -->
-            <!-- Displayed text will be in grams -->
-            <!-- End of the loop -->
-            <!-- Total 100 options (1 to 100) -->
         </select>
     </div>
     <div>
@@ -126,6 +113,9 @@
 
             myChart.update();
         }
+
+        // Set default selected option to 0 grams
+        document.getElementById('initialMass').value = '0';
     </script>
 </body>
 </html>
