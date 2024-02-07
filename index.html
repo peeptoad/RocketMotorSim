@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,6 +28,14 @@
     </div>
     <div>
         <canvas id="performanceChart" width="800" height="400"></canvas>
+    </div>
+    <div id="analysisResults">
+        <h2>Analysis Results</h2>
+        <p id="averageThrust"></p>
+        <p id="totalImpulse"></p>
+        <p id="specificImpulse"></p>
+        <p id="thrustToWeightRatio"></p>
+        <p id="thrustCurveAnalysis"></p>
     </div>
 
     <script>
@@ -95,8 +104,57 @@
             throatDiameter = parseFloat(document.getElementById('throatDiameter').value);
             exitDiameter = parseFloat(document.getElementById('exitDiameter').value);
         }
+
+        // Function to calculate average thrust
+        function calculateAverageThrust() {
+            const totalThrust = thrusts.reduce((acc, val) => acc + val, 0);
+            const averageThrust = totalThrust / thrusts.length;
+            return averageThrust;
+        }
+
+        // Function to calculate total impulse
+        function calculateTotalImpulse() {
+            let totalImpulse = 0;
+            for (let i = 1; i < times.length; i++) {
+                const deltaTime = times[i] - times[i - 1];
+                const averageThrust = (thrusts[i] + thrusts[i - 1]) / 2;
+                totalImpulse += averageThrust * deltaTime;
+            }
+            return totalImpulse;
+        }
+
+        // Function to calculate specific impulse
+        function calculateSpecificImpulse() {
+            const totalImpulse = calculateTotalImpulse();
+            const specificImpulse = totalImpulse / (propellantMass * 0.001); // Convert propellant mass from grams to kilograms
+            return specificImpulse;
+        }
+
+        // Function to calculate thrust-to-weight ratio
+        function calculateThrustToWeightRatio() {
+            // Assuming constant propellant mass
+            const maxThrust = Math.max(...thrusts);
+            const thrustToWeightRatio = maxThrust / (propellantMass * 0.001 * 9.81); // Convert propellant mass from grams to kilograms
+            return thrustToWeightRatio;
+        }
+
+        // Function to perform thrust curve analysis
+        function analyzeThrustCurve() {
+            const maxThrust = Math.max(...thrusts);
+            const burnTime = times[times.length - 1];
+            const averageThrust = calculateAverageThrust();
+            const totalImpulse = calculateTotalImpulse();
+
+            const analysisResults = document.getElementById('analysisResults');
+            analysisResults.innerHTML = "<h2>Analysis Results</h2>";
+            analysisResults.innerHTML += "<p>Average Thrust: " + averageThrust.toFixed(2) + " lbs</p>";
+            analysisResults.innerHTML += "<p>Total Impulse: " + totalImpulse.toFixed(2) + " lbf-sec</p>";
+            analysisResults.innerHTML += "<p>Specific Impulse: " + calculateSpecificImpulse().toFixed(2) + " seconds</p>";
+            analysisResults.innerHTML += "<p>Thrust-to-Weight Ratio: " + calculateThrustToWeightRatio().toFixed(2) + "</p>";
+            analysisResults.innerHTML += "<p>Max Thrust: " + maxThrust.toFixed(2) + " lbs</p>";
+            analysisResults.innerHTML += "<p>Burn Time: " + burnTime.toFixed(2) + " seconds</p>";
+        }
     </script>
 </body>
 </html>
-
 
