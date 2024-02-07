@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,6 +47,19 @@
         <p>Mass Flow Rate (grams/second): <span id="massFlowRate"></span></p>
         <p>Total Impulse per Unit Mass (N-sec/gram): <span id="totalImpulsePerUnitMass"></span></p>
         <p>Specific Impulse (seconds): <span id="specificImpulse"></span></p>
+    </div>
+    <hr>
+    <div>
+        <h2>Flight Simulator</h2>
+        <label for="rocketWeight">Rocket Weight (lbs):</label>
+        <input type="number" id="rocketWeight">
+        <label for="rocketSize">Rocket Size (meters):</label>
+        <input type="number" id="rocketSize">
+        <!-- Additional inputs and options can be added here -->
+        <button onclick="simulateFlight()">Simulate Flight</button>
+    </div>
+    <div id="flightResults">
+        <!-- Flight simulation results will be displayed here -->
     </div>
 
     <script>
@@ -221,6 +233,21 @@
             document.getElementById('specificImpulse').textContent = calculateSpecificImpulse();
         }
 
+        // Function to simulate flight
+        function simulateFlight() {
+            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
+            let rocketSize = parseFloat(document.getElementById('rocketSize').value);
+            
+            // Additional flight simulation logic can be added here
+            let flightResults = document.getElementById('flightResults');
+            flightResults.innerHTML = `
+                <h3>Flight Simulation Results</h3>
+                <p>Rocket Weight: ${rocketWeight} lbs</p>
+                <p>Rocket Size: ${rocketSize} meters</p>
+                <!-- Add more flight simulation results here -->
+            `;
+        }
+
         // Generate options for initial propellant mass dropdown
         const initialMassDropdown = document.getElementById('initialMass');
         for (let i = 1; i <= 100; i++) {
@@ -232,5 +259,7 @@
     </script>
 </body>
 </html>
+
+
 
 
