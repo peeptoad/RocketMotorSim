@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +10,10 @@
 <body>
     <h1>Rocket Engine Performance Analyzer</h1>
     <div>
+        <label for="initialMass">Initial Propellant Mass (lbs):</label>
+        <input type="number" id="initialMass">
+    </div>
+    <div>
         <label for="time">Time (seconds):</label>
         <input type="number" id="time">
         <label for="thrust">Thrust (lbs):</label>
@@ -20,44 +22,22 @@
         <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
     </div>
     <div>
-        <label for="propellantMass">Propellant Mass (grams):</label>
-        <input type="number" id="propellantMass">
-        <label for="throatDiameter">Nozzle Throat Diameter (inches):</label>
-        <input type="number" id="throatDiameter">
-        <label for="exitDiameter">Nozzle Exit Diameter (inches):</label>
-        <input type="number" id="exitDiameter">
-    </div>
-    <div>
         <canvas id="performanceChart" width="800" height="400"></canvas>
-    </div>
-    <div id="analysisResults">
-        <h2>Analysis Results</h2>
-        <p id="averageThrust"></p>
-        <p id="totalImpulse"></p>
-        <p id="specificImpulse"></p>
-        <p id="thrustToWeightRatio"></p>
-        <p id="thrustCurveAnalysis"></p>
     </div>
 
     <script>
         // Initialize arrays to store data
-        let times = [0]; // Initial data point at time 0
-        let thrusts = [0]; // Initial data point at thrust 0
-
-        // Initialize variables for additional inputs
-        let propellantMass = 0;
-        let throatDiameter = 0;
-        let exitDiameter = 0;
+        let dataPoints = [];
 
         // Initialize chart
         const ctx = document.getElementById('performanceChart').getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: times,
+                labels: [],
                 datasets: [{
                     label: 'Thrust (lbs)',
-                    data: thrusts,
+                    data: [],
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
                     borderWidth: 1
@@ -85,78 +65,47 @@
 
         // Function to add data to arrays and update chart
         function addData() {
-            let timeInput = document.getElementById('time').value;
-            let thrustInput = document.getElementById('thrust').value;
-            times.push(parseFloat(timeInput));
-            thrusts.push(parseFloat(thrustInput));
-            myChart.update();
-            analyzeThrustCurve(); // Call the analysis function after updating the chart
+            let timeInput = parseFloat(document.getElementById('time').value);
+            let thrustInput = parseFloat(document.getElementById('thrust').value);
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            
+            // Calculate cumulative thrust
+            let cumulativeThrust = dataPoints.length === 0 ? 0 : dataPoints[dataPoints.length - 1].cumulativeThrust;
+            cumulativeThrust += timeInput * thrustInput;
+
+            dataPoints.push({
+                time: timeInput,
+                thrust: thrustInput,
+                cumulativeThrust: cumulativeThrust
+            });
+
+            updateChart();
         }
 
         // Function to remove last data point from arrays and update chart
         function removeLastDataPoint() {
-            times.pop();
-            thrusts.pop();
-            myChart.update();
-            analyzeThrustCurve(); // Call the analysis function after updating the chart
+            dataPoints.pop();
+            updateChart();
         }
 
-        // Function to store additional input values
-        function storeAdditionalInputs() {
-            propellantMass = parseFloat(document.getElementById('propellantMass').value);
-            throatDiameter = parseFloat(document.getElementById('throatDiameter').value);
-            exitDiameter = parseFloat(document.getElementById('exitDiameter').value);
-        }
+        // Function to update chart with current data points
+        function updateChart() {
+            // Reset chart data
+            myChart.data.labels = [];
+            myChart.data.datasets[0].data = [];
 
-        // Function to calculate average thrust
-        function calculateAverageThrust() {
-            const totalThrust = thrusts.reduce((acc, val) => acc + val, 0);
-            const averageThrust = totalThrust / thrusts.length;
-            return averageThrust;
-        }
-
-        // Function to calculate total impulse
-        function calculateTotalImpulse() {
-            let totalImpulse = 0;
-            for (let i = 1; i < times.length; i++) {
-                const deltaTime = times[i] - times[i - 1];
-                const averageThrust = (thrusts[i] + thrusts[i - 1]) / 2;
-                totalImpulse += averageThrust * deltaTime;
+            let time = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                time += dataPoints[i].time;
+                myChart.data.labels.push(time.toFixed(2)); // Round time to 2 decimal places
+                myChart.data.datasets[0].data.push(dataPoints[i].cumulativeThrust);
             }
-            return totalImpulse;
-        }
 
-        // Function to calculate specific impulse
-        function calculateSpecificImpulse() {
-            const totalImpulse = calculateTotalImpulse();
-            const specificImpulse = totalImpulse / (propellantMass * 0.001); // Convert propellant mass from grams to kilograms
-            return specificImpulse;
-        }
-
-        // Function to calculate thrust-to-weight ratio
-        function calculateThrustToWeightRatio() {
-            // Assuming constant propellant mass
-            const maxThrust = Math.max(...thrusts);
-            const thrustToWeightRatio = maxThrust / (propellantMass * 0.001 * 9.81); // Convert propellant mass from grams to kilograms
-            return thrustToWeightRatio;
-        }
-
-        // Function to perform thrust curve analysis
-        function analyzeThrustCurve() {
-            const maxThrust = Math.max(...thrusts);
-            const burnTime = times[times.length - 1];
-            const averageThrust = calculateAverageThrust();
-            const totalImpulse = calculateTotalImpulse();
-
-            const analysisResults = document.getElementById('analysisResults');
-            analysisResults.innerHTML = "<h2>Analysis Results</h2>";
-            analysisResults.innerHTML += "<p>Average Thrust: " + averageThrust.toFixed(2) + " lbs</p>";
-            analysisResults.innerHTML += "<p>Total Impulse: " + totalImpulse.toFixed(2) + " lbf-sec</p>";
-            analysisResults.innerHTML += "<p>Specific Impulse: " + calculateSpecificImpulse().toFixed(2) + " seconds</p>";
-            analysisResults.innerHTML += "<p>Thrust-to-Weight Ratio: " + calculateThrustToWeightRatio().toFixed(2) + "</p>";
-            analysisResults.innerHTML += "<p>Max Thrust: " + maxThrust.toFixed(2) + " lbs</p>";
-            analysisResults.innerHTML += "<p>Burn Time: " + burnTime.toFixed(2) + " seconds</p>";
+            myChart.update();
         }
     </script>
 </body>
 </html>
+
+
+
