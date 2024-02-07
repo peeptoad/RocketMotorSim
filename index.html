@@ -50,24 +50,14 @@
     </div>
     <hr>
     <div>
-        <h2>Flight Simulator</h2>
-        <label for="rocketWeight">Rocket Weight (lbs):</label>
-        <input type="number" id="rocketWeight">
-        <label for="rocketDiameter">Rocket Diameter (inches):</label>
-        <input type="number" id="rocketDiameter">
-        <label for="rocketLength">Rocket Length (inches):</label>
-        <input type="number" id="rocketLength">
-        <button onclick="simulateFlight()">Simulate Flight</button>
-    </div>
-    <div id="flightResults">
-        <!-- Flight simulation results will be displayed here -->
+        <h2>Flight Profile</h2>
+        <button onclick="determineFlightProfile()">Calculate Flight Profile</button>
+        <div id="flightProfileResults">
+            <!-- Flight profile results will be displayed here -->
+        </div>
     </div>
 
     <script>
-        // Constants
-        const GRAVITY_AT_SEA_LEVEL = 9.81; // Placeholder value, replace with actual value
-        const AIR_DENSITY_AT_SEA_LEVEL = 1.225; // Placeholder value, replace with actual value
-
         // Initialize arrays to store data
         let dataPoints = [{ time: 0, thrust: 0 }]; // Initial data point at (0, 0)
 
@@ -105,72 +95,195 @@
             }
         });
 
-        // Function to add data point
+        // Function to add data to arrays and update chart
         function addData() {
-            let time = parseFloat(document.getElementById('time').value);
-            let thrust = parseFloat(document.getElementById('thrust').value);
-            dataPoints.push({ time: time, thrust: thrust });
+            let timeInput = parseFloat(document.getElementById('time').value);
+            let thrustInput = parseFloat(document.getElementById('thrust').value);
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            
+            dataPoints.push({
+                time: timeInput,
+                thrust: thrustInput
+            });
 
-            // Update chart
-            myChart.data.labels.push(time.toString());
-            myChart.data.datasets[0].data.push(thrust);
-            myChart.update();
+            updateChart();
         }
 
-        // Function to add ejection charge time
+        // Function to add ejection charge data point
         function addEjectionCharge() {
             let ejectionTime = parseFloat(document.getElementById('ejectionTime').value);
-            dataPoints.push({ time: ejectionTime, thrust: 0 }); // Assuming ejection charge thrust is 0
+            
+            // Add ejection charge data point with 0 thrust
+            dataPoints.push({
+                time: ejectionTime,
+                thrust: 0
+            });
 
-            // Update chart
-            myChart.data.labels.push(ejectionTime.toString());
-            myChart.data.datasets[0].data.push(0);
-            myChart.update();
+            updateChart();
         }
 
-        // Function to remove last data point
+        // Function to remove last data point from arrays and update chart
         function removeLastDataPoint() {
             dataPoints.pop();
+            updateChart();
+        }
 
-            // Update chart
-            myChart.data.labels.pop();
-            myChart.data.datasets[0].data.pop();
+        // Function to update chart with current data points
+        function updateChart() {
+            // Reset chart data
+            myChart.data.labels = [];
+            myChart.data.datasets[0].data = [];
+
+            for (let i = 0; i < dataPoints.length; i++) {
+                myChart.data.labels.push(dataPoints[i].time.toFixed(2)); // Round time to 2 decimal places
+                myChart.data.datasets[0].data.push(dataPoints[i].thrust);
+            }
+
             myChart.update();
         }
 
-        // Function to calculate metrics
+        // Function to calculate metrics and update UI
         function calculateMetrics() {
-            // Calculate metrics based on dataPoints array
+            // Calculate metrics (example calculations)
+            let maxThrust = calculateMaxThrust();
+            let averageThrust = calculateAverageThrust();
+            let burnTime = calculateBurnTime();
+            let totalDuration = calculateTotalDuration();
+            let totalImpulse = calculateTotalImpulse();
+            let massFlowRate = calculateMassFlowRate();
+            let totalImpulsePerUnitMass = calculateTotalImpulsePerUnitMass();
+            let specificImpulse = calculateSpecificImpulse();
+
             // Update UI with calculated metrics
+            document.getElementById('maxThrust').textContent = maxThrust.toFixed(2);
+            document.getElementById('averageThrust').textContent = averageThrust.toFixed(2);
+            document.getElementById('burnTime').textContent = burnTime.toFixed(2);
+            document.getElementById('totalDuration').textContent = totalDuration.toFixed(2);
+            document.getElementById('totalImpulseLbs').textContent = totalImpulse.toFixed(2);
+            document.getElementById('massFlowRate').textContent = massFlowRate.toFixed(2);
+            document.getElementById('totalImpulsePerUnitMass').textContent = totalImpulsePerUnitMass.toFixed(2);
+            document.getElementById('specificImpulse').textContent = specificImpulse.toFixed(2);
         }
 
-        // Function to simulate flight
-        function simulateFlight() {
-            // Retrieve inputs from UI
-            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
-            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value);
-            let rocketLength = parseFloat(document.getElementById('rocketLength').value);
+        // Function to determine flight profile
+        function determineFlightProfile() {
+            // Get data from engine performance analysis
+            let maxThrust = parseFloat(document.getElementById('maxThrust').textContent);
+            let totalImpulse = parseFloat(document.getElementById('totalImpulseLbs').textContent);
+            let burnTime = parseFloat(document.getElementById('burnTime').textContent);
 
-            // Perform flight simulation with environmental factors
-            // Update UI with flight simulation results
+            // Get data from rocket specifications
+            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value); // in lbs
+            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value); // in inches
+            let rocketLength = parseFloat(document.getElementById('rocketLength').value); // in inches
+
+            // Environmental factors (you can adjust these as needed)
+            let airDensity = 0.00237; // in slugs/ft^3 (standard air density at sea level)
+            let dragCoefficient = 0.75; // typical drag coefficient for rockets
+            let gravity = 32.17; // gravitational acceleration at sea level in ft/s^2
+
+            // Calculate cross-sectional area of the rocket (assuming cylindrical shape)
+            let crossSectionalArea = Math.PI * Math.pow(rocketDiameter / 2, 2); // in square inches
+
+            // Calculate total drag force
+            let dragForce = 0.5 * airDensity * Math.pow((maxThrust / rocketWeight), 2) * dragCoefficient * crossSectionalArea;
+
+            // Calculate acceleration during burn phase
+            let acceleration = maxThrust / (rocketWeight + (totalImpulse / gravity)); // in ft/s^2
+
+            // Calculate maximum altitude reached during burn phase (ignoring drag initially)
+            let maxAltitudeBurn = (acceleration * Math.pow(burnTime, 2)) / 8; // in feet
+
+            // Calculate maximum velocity reached during burn phase (ignoring drag initially)
+            let maxVelocityBurn = acceleration * burnTime; // in ft/s
+
+            // Calculate time to apogee (ignoring drag initially)
+            let timeToApogee = Math.sqrt((2 * maxAltitudeBurn) / gravity); // in seconds
+
+            // Calculate time from burnout to apogee
+            let timeFromBurnoutToApogee = timeToApogee - burnTime; // in seconds
+
+            // Calculate apogee altitude accounting for drag during coast phase
+            let apogeeAltitude = (maxVelocityBurn * timeFromBurnoutToApogee) - ((gravity * Math.pow(timeFromBurnoutToApogee, 2)) / 8); // in feet
+
+            // Calculate descent time (assuming free fall)
+            let descentTime = Math.sqrt((2 * apogeeAltitude) / gravity); // in seconds
+
+            // Calculate descent velocity
+            let descentVelocity = gravity * descentTime; // in ft/s
+
+            // Display flight profile results
+            let flightProfileResults = document.getElementById('flightProfileResults');
+            flightProfileResults.innerHTML = `
+                <p>Max Altitude During Burn Phase: ${maxAltitudeBurn.toFixed(2)} feet</p>
+                <p>Max Velocity During Burn Phase: ${maxVelocityBurn.toFixed(2)} ft/s</p>
+                <p>Time to Apogee (from Burnout): ${timeToApogee.toFixed(2)} seconds</p>
+                <p>Time from Burnout to Apogee: ${timeFromBurnoutToApogee.toFixed(2)} seconds</p>
+                <p>Apogee Altitude (including drag during coast phase): ${apogeeAltitude.toFixed(2)} feet</p>
+                <p>Descent Time (from apogee to ground): ${descentTime.toFixed(2)} seconds</p>
+                <p>Descent Velocity (at ground impact): ${descentVelocity.toFixed(2)} ft/s</p>
+            `;
         }
 
-        // Function to interpolate thrust value from provided data at a given time
-        function interpolateThrust(dataPoints, time) {
-            // Interpolate thrust value using provided dataPoints array
-            // Return the interpolated thrust value
+        // Function to calculate maximum thrust
+        function calculateMaxThrust() {
+            let maxThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                if (dataPoints[i].thrust > maxThrust) {
+                    maxThrust = dataPoints[i].thrust;
+                }
+            }
+            return maxThrust;
         }
 
-        // Function to calculate drag force
-        function calculateDragForce(velocity) {
-            // Calculate drag force based on velocity, drag coefficient, and rocket cross-sectional area
-            // Return the drag force
+        // Function to calculate average thrust
+        function calculateAverageThrust() {
+            let totalThrust = 0;
+            for (let i = 0; i < dataPoints.length; i++) {
+                totalThrust += dataPoints[i].thrust;
+            }
+            return totalThrust / dataPoints.length;
         }
 
-        // Function to calculate gravitational acceleration at a given altitude
-        function calculateGravitationalAcceleration(altitude) {
-            // Calculate gravitational acceleration based on altitude
-            // Return the gravitational acceleration
+        // Function to calculate burn time
+        function calculateBurnTime() {
+            return dataPoints[dataPoints.length - 1].time;
+        }
+
+        // Function to calculate total duration
+        function calculateTotalDuration() {
+            return dataPoints[dataPoints.length - 1].time;
+        }
+
+        // Function to calculate total impulse
+        function calculateTotalImpulse() {
+            let totalImpulse = 0;
+            for (let i = 0; i < dataPoints.length - 1; i++) {
+                let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
+                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
+                totalImpulse += avgThrust * timeInterval;
+            }
+            return totalImpulse;
+        }
+
+        // Function to calculate mass flow rate
+        function calculateMassFlowRate() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            let burnTime = calculateBurnTime();
+            if (burnTime === 0) return 0;
+            return (initialMass / burnTime).toFixed(2);
+        }
+
+        // Function to calculate total impulse per unit mass
+        function calculateTotalImpulsePerUnitMass() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            return (calculateTotalImpulse() / initialMass).toFixed(2);
+        }
+
+        // Function to calculate specific impulse
+        function calculateSpecificImpulse() {
+            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            return (calculateTotalImpulse() / initialMass).toFixed(2);
         }
     </script>
 </body>
