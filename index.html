@@ -25,49 +25,47 @@
         let times = [];
         let thrusts = [];
 
-        // Function to add data to arrays
+        // Initialize chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: times,
+                datasets: [{
+                    label: 'Thrust (lbs)',
+                    data: thrusts,
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Thrust (lbs)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to add data to arrays and update chart
         function addData() {
             let timeInput = document.getElementById('time').value;
             let thrustInput = document.getElementById('thrust').value;
             times.push(parseFloat(timeInput));
             thrusts.push(parseFloat(thrustInput));
-            updateChart();
-        }
-
-        // Function to update the chart
-        function updateChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: times,
-                    datasets: [{
-                        label: 'Thrust (lbs)',
-                        data: thrusts,
-                        borderColor: 'blue',
-                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            position: 'bottom',
-                            title: {
-                                display: true,
-                                text: 'Time (seconds)'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Thrust (lbs)'
-                            }
-                        }
-                    }
-                }
-            });
+            myChart.update();
         }
     </script>
 </body>
