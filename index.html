@@ -41,17 +41,17 @@
 
     <script>
         // Initialize arrays to store data
-        let dataPoints = [];
+        let dataPoints = [{ time: 0, thrust: 0 }]; // Initial data point at (0, 0)
 
         // Initialize chart
         const ctx = document.getElementById('performanceChart').getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: ['0'], // Initial label at 0
                 datasets: [{
                     label: 'Thrust (lbs)',
-                    data: [],
+                    data: [0], // Initial data point at (0, 0)
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
                     borderWidth: 1
@@ -152,4 +152,5 @@
     </script>
 </body>
 </html>
+
 
