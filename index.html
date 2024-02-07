@@ -28,171 +28,143 @@
         <input type="number" id="rocketLength">
     </div>
     <div>
-        <label for="time">Time (seconds):</label>
-        <input type="number" id="time">
-        <label for="thrust">Thrust (lbs):</label>
-        <input type="number" id="thrust">
-        <button onclick="addData()">Add Data</button>
+        <button onclick="simulateRocket()">Simulate Rocket Flight</button>
     </div>
     <div>
-        <label for="ejectionTime">Ejection Charge Time (seconds):</label>
-        <input type="number" id="ejectionTime">
-        <button onclick="addEjectionCharge()">Add Ejection Charge</button>
-    </div>
-    <div>
-        <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
-        <button onclick="calculateMetrics()">Calculate Metrics</button>
-    </div>
-    <div>
-        <canvas id="performanceChart" width="800" height="400"></canvas>
-    </div>
-    <div>
-        <p>Maximum Thrust (lbs): <span id="maxThrust"></span></p>
-        <p>Maximum Thrust (N): <span id="maxThrustNewton"></span></p>
-        <p>Average Thrust (lbs): <span id="averageThrust"></span></p>
-        <p>Average Thrust (N): <span id="averageThrustNewton"></span></p>
-        <p>Burn Time (seconds): <span id="burnTime"></span></p>
-        <p>Time from Burnout to Ejection (seconds): <span id="burnoutToEjectionTime"></span></p>
-        <p>Total Duration (seconds): <span id="totalDuration"></span></p>
-        <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
-        <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
-        <p>Mass Flow Rate (grams/second): <span id="massFlowRate"></span></p>
-        <p>Total Impulse per Unit Mass (N-sec/gram): <span id="totalImpulsePerUnitMass"></span></p>
-        <p>Specific Impulse (seconds): <span id="specificImpulse"></span></p>
-        <p>Peak Acceleration (m/s²): <span id="peakAcceleration"></span></p>
+        <canvas id="rocketChart" width="800" height="400"></canvas>
     </div>
 
     <script>
-        // Initialize arrays to store data
-        let dataPoints = [{ time: 0, thrust: 0 }]; // Initial data point at (0, 0)
+        // Constants
+        const g = 9.81; // Acceleration due to gravity (m/s^2)
+        const Cd = 0.75; // Drag coefficient
+        const airDensity0 = 1.225; // Air density at sea level (kg/m^3)
 
-        // Initialize chart
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['0'], // Initial label at 0
-                datasets: [{
-                    label: 'Thrust (lbs)',
-                    data: [0], // Initial data point at (0, 0)
-                    borderColor: 'blue',
-                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'Time (seconds)'
-                        }
+        // Rocket properties
+        let initialRocketMass = 1000; // Initial rocket mass (kg)
+        let initialPropellantMass = 500; // Initial propellant mass (kg)
+        let rocketDiameter = 0.2; // Rocket diameter (m)
+        let rocketLength = 2.0; // Rocket length (m)
+
+        // Simulation parameters
+        const totalTime = 60; // Total simulation time (seconds)
+        const timeStep = 0.1; // Time step for numerical integration (seconds)
+
+        // Function to calculate air density at a given altitude
+        function calculateAirDensity(altitude) {
+            return airDensity0 * Math.exp(-altitude / 8500);
+        }
+
+        // Function to calculate drag force
+        function calculateDragForce(velocity, altitude) {
+            const airDensity = calculateAirDensity(altitude);
+            const rocketArea = Math.PI * Math.pow((rocketDiameter / 2), 2); // Cross-sectional area of the rocket (m^2)
+            return 0.5 * Cd * airDensity * Math.pow(velocity, 2) * rocketArea;
+        }
+
+        // Function to simulate rocket trajectory using Runge-Kutta 4th order method
+        function simulateRocketTrajectory() {
+            let time = 0; // Initialize time
+            let rocketMass = initialRocketMass + initialPropellantMass; // Total rocket mass (kg)
+            let velocity = 0; // Initialize velocity
+            let altitude = 0; // Initialize altitude
+
+            // Arrays to store simulation results
+            const timeArray = [];
+            const altitudeArray = [];
+            const velocityArray = [];
+
+            // Perform numerical integration using Runge-Kutta 4th order method
+            while (time <= totalTime) {
+                // Calculate thrust (assuming constant thrust for simplicity)
+                const thrust = 1000; // Thrust (N)
+
+                // Calculate drag force
+                const dragForce = calculateDragForce(velocity, altitude);
+
+                // Calculate net force
+                const netForce = thrust - dragForce - (rocketMass * g);
+
+                // Calculate acceleration using net force
+                const acceleration = netForce / rocketMass;
+
+                // Update velocity and altitude using Runge-Kutta 4th order method
+                const k1v = acceleration;
+                const k1h = velocity;
+
+                const k2v = acceleration;
+                const k2h = velocity + (timeStep / 2) * k1v;
+
+                const k3v = acceleration;
+                const k3h = velocity + (timeStep / 2) * k2v;
+
+                const k4v = acceleration;
+                const k4h = velocity + timeStep * k3v;
+
+                velocity += (timeStep / 6) * (k1v + 2 * k2v + 2 * k3v + k4v);
+                altitude += (timeStep / 6) * (k1h + 2 * k2h + 2 * k3h + k4h);
+
+                // Update rocket mass (propellant mass decreases over time)
+                const propellantMassConsumed = (initialPropellantMass / totalTime) * timeStep;
+                rocketMass -= propellantMassConsumed;
+
+                // Store simulation results
+                timeArray.push(time);
+                altitudeArray.push(altitude);
+                velocityArray.push(velocity);
+
+                // Increment time
+                time += timeStep;
+            }
+
+            return { timeArray, altitudeArray, velocityArray };
+        }
+
+        // Function to simulate rocket flight and plot results
+        function simulateRocket() {
+            // Run simulation
+            const { timeArray, altitudeArray, velocityArray } = simulateRocketTrajectory();
+
+            // Plot results
+            const ctx = document.getElementById('rocketChart').getContext('2d');
+            const rocketChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeArray,
+                    datasets: [{
+                        label: 'Altitude (m)',
+                        data: altitudeArray,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        borderWidth: 1
                     },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Thrust (lbs)'
+                    {
+                        label: 'Velocity (m/s)',
+                        data: velocityArray,
+                        borderColor: 'green',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Time (s)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Altitude (m) / Velocity (m/s)'
+                            }
                         }
                     }
                 }
-            }
-        });
-
-        // Generate options for initial propellant mass dropdown
-        const initialPropellantMassDropdown = document.getElementById('initialPropellantMass');
-        for (let i = 1; i <= 100; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `${i} grams`;
-            initialPropellantMassDropdown.appendChild(option);
-        }
-
-        // Generate options for initial rocket mass dropdown
-        const initialRocketMassDropdown = document.getElementById('initialRocketMass');
-        for (let i = 0; i <= 5000; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `${i} grams`;
-            initialRocketMassDropdown.appendChild(option);
-        }
-        
-        // Function to add data to arrays and update chart
-        function addData() {
-            let timeInput = parseFloat(document.getElementById('time').value);
-            let thrustInput = parseFloat(document.getElementById('thrust').value);
-            
-            dataPoints.push({
-                time: timeInput,
-                thrust: thrustInput
             });
-
-            updateChart();
-        }
-
-        // Function to add ejection charge data point
-        function addEjectionCharge() {
-            let ejectionTime = parseFloat(document.getElementById('ejectionTime').value);
-            
-            // Add ejection charge data point with 0 thrust
-            dataPoints.push({
-                time: ejectionTime,
-                thrust: 0
-            });
-
-            updateChart();
-        }
-
-        // Function to remove last data point from arrays and update chart
-        function removeLastDataPoint() {
-            dataPoints.pop();
-            updateChart();
-        }
-
-        // Function to update chart with current data points
-        function updateChart() {
-            // Reset chart data
-            myChart.data.labels = [];
-            myChart.data.datasets[0].data = [];
-
-            for (let i = 0; i < dataPoints.length; i++) {
-                myChart.data.labels.push(dataPoints[i].time.toFixed(2)); // Round time to 2 decimal places
-                myChart.data.datasets[0].data.push(dataPoints[i].thrust);
-            }
-
-            myChart.update();
-        }
-
-        // Function to calculate metrics and update UI
-        function calculateMetrics() {
-            // Calculate and display other metrics (max thrust, average thrust, burn time, etc.)
-
-            // Calculate and display peak acceleration
-            document.getElementById('peakAcceleration').textContent = calculatePeakAcceleration().toFixed(2);
-        }
-
-        // Function to calculate peak acceleration
-        function calculatePeakAcceleration() {
-            let maxAcceleration = 0;
-            for (let i = 0; i < dataPoints.length; i++) {
-                let thrust = dataPoints[i].thrust;
-                let totalRocketMass = calculateTotalRocketMassAtTime(i); // Calculate total mass of the rocket at this time
-                let acceleration = thrust / totalRocketMass;
-                if (acceleration > maxAcceleration) {
-                    maxAcceleration = acceleration;
-                }
-            }
-            return maxAcceleration;
-        }
-
-        // Function to calculate total mass of the rocket at a specific time index
-        function calculateTotalRocketMassAtTime(index) {
-            let initialRocketMass = parseFloat(document.getElementById('initialRocketMass').value);
-            let initialPropellantMass = parseFloat(document.getElementById('initialPropellantMass').value);
-            let burnTime = dataPoints[index].time;
-            let propellantMassConsumed = (initialPropellantMass / burnTime) * dataPoints[index].time;
-            return initialRocketMass - propellantMassConsumed;
         }
     </script>
 </body>
