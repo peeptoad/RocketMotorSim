@@ -156,7 +156,7 @@
 
         // Function to calculate burn time
         function calculateBurnTime() {
-            return dataPoints[dataPoints.length - 1].time - dataPoints[0].time;
+            return dataPoints[dataPoints.length - 2].time - dataPoints[0].time;
         }
 
         // Function to calculate time from burnout to ejection
@@ -166,7 +166,7 @@
 
         // Function to calculate total duration
         function calculateTotalDuration() {
-            return dataPoints[dataPoints.length - 1].time;
+            return dataPoints[dataPoints.length - 2].time;
         }
 
         // Function to calculate area under the curve (total impulse)
@@ -231,6 +231,5 @@
     </script>
 </body>
 </html>
-
 
 
