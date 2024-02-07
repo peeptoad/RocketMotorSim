@@ -53,8 +53,10 @@
         <h2>Flight Simulator</h2>
         <label for="rocketWeight">Rocket Weight (lbs):</label>
         <input type="number" id="rocketWeight">
-        <label for="rocketSize">Rocket Size (meters):</label>
-        <input type="number" id="rocketSize">
+        <label for="rocketDiameter">Rocket Diameter (inches):</label>
+        <input type="number" id="rocketDiameter">
+        <label for="rocketLength">Rocket Length (inches):</label>
+        <input type="number" id="rocketLength">
         <!-- Additional inputs and options can be added here -->
         <button onclick="simulateFlight()">Simulate Flight</button>
     </div>
@@ -236,14 +238,16 @@
         // Function to simulate flight
         function simulateFlight() {
             let rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
-            let rocketSize = parseFloat(document.getElementById('rocketSize').value);
+            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value);
+            let rocketLength = parseFloat(document.getElementById('rocketLength').value);
             
             // Additional flight simulation logic can be added here
             let flightResults = document.getElementById('flightResults');
             flightResults.innerHTML = `
                 <h3>Flight Simulation Results</h3>
                 <p>Rocket Weight: ${rocketWeight} lbs</p>
-                <p>Rocket Size: ${rocketSize} meters</p>
+                <p>Rocket Diameter: ${rocketDiameter} inches</p>
+                <p>Rocket Length: ${rocketLength} inches</p>
                 <!-- Add more flight simulation results here -->
             `;
         }
@@ -259,7 +263,6 @@
     </script>
 </body>
 </html>
-
 
 
 
