@@ -235,30 +235,104 @@
             document.getElementById('specificImpulse').textContent = calculateSpecificImpulse();
         }
 
-        // Function to simulate flight
+        // Function to simulate rocket flight
         function simulateFlight() {
-            let rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
-            let rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value);
-            let rocketLength = parseFloat(document.getElementById('rocketLength').value);
-            
-            // Additional flight simulation logic can be added here
-            let flightResults = document.getElementById('flightResults');
+            const rocketWeight = parseFloat(document.getElementById('rocketWeight').value);
+            const rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value);
+            const rocketLength = parseFloat(document.getElementById('rocketLength').value);
+            const initialPropellantMass = parseFloat(document.getElementById('initialMass').value);
+
+            // Simulate rocket flight
+            const thrustProfile = dataPoints.map(point => [point.time, point.thrust]);
+            const rocket = new Rocket(rocketWeight, rocketDiameter, rocketLength, initialPropellantMass, thrustProfile);
+            const totalTime = calculateTotalDuration(); // Use total burn time as simulation time
+            const timeStep = 0.1; // Time step for simulation (seconds)
+            const flightData = rocket.simulateFlight(totalTime, timeStep); // Simulate rocket flight
+
+            // Display flight simulation results
+            const flightResults = document.getElementById('flightResults');
             flightResults.innerHTML = `
                 <h3>Flight Simulation Results</h3>
-                <p>Rocket Weight: ${rocketWeight} lbs</p>
-                <p>Rocket Diameter: ${rocketDiameter} inches</p>
-                <p>Rocket Length: ${rocketLength} inches</p>
+                <p>Total Flight Time: ${flightData[flightData.length - 1].time.toFixed(2)} seconds</p>
+                <p>Maximum Altitude: ${Math.max(...flightData.map(data => data.position)).toFixed(2)} meters</p>
                 <!-- Add more flight simulation results here -->
             `;
         }
 
-        // Generate options for initial propellant mass dropdown
+        // Rocket class for flight simulation
+        class Rocket {
+            constructor(weight, diameter, length, initialPropellantMass, thrustProfile) {
+                this.weight = weight; // Rocket weight (lbs)
+                this.diameter = diameter; // Rocket diameter (inches)
+                this.length = length; // Rocket length (inches)
+                this.initialPropellantMass = initialPropellantMass; // Initial propellant mass (grams)
+                this.thrustProfile = thrustProfile; // Thrust profile (array of [time, thrust] pairs)
+                this.position = 0; // Initial position (m)
+                this.velocity = 0; // Initial velocity (m/s)
+                this.mass = this.weight + this.initialPropellantMass / 1000; // Initial mass (kg), including propellant
+            }
+
+            // Calculate thrust at a given time
+            calculateThrust(time) {
+                for (let i = 0; i < this.thrustProfile.length; i++) {
+                    if (this.thrustProfile[i][0] > time) {
+                        // Linear interpolation for thrust between data points
+                        const t1 = this.thrustProfile[i - 1][0];
+                        const t2 = this.thrustProfile[i][0];
+                        const thrust1 = this.thrustProfile[i - 1][1];
+                        const thrust2 = this.thrustProfile[i][1];
+                        return thrust1 + ((thrust2 - thrust1) / (t2 - t1)) * (time - t1);
+                    }
+                }
+                // If time exceeds the thrust profile, return 0 thrust
+                return 0;
+            }
+
+            // Update rocket state
+            updateState(timeStep) {
+                const thrust = this.calculateThrust(timeStep);
+                const gravitationalForce = this.weight * 9.81; // Gravitational force (N)
+                const airResistance = this.calculateAirResistance(); // Air resistance (N)
+
+                // Net force
+                const netForce = thrust - gravitationalForce - airResistance;
+
+                // Update acceleration
+                const acceleration = netForce / this.mass;
+
+                // Update velocity
+                this.velocity += acceleration * timeStep;
+
+                // Update position
+                this.position += this.velocity * timeStep;
+
+                // Update mass (assuming constant mass flow rate)
+                const massFlowRate = this.initialPropellantMass / (this.thrustProfile[this.thrustProfile.length - 1][0]); // grams/second
+                this.mass -= massFlowRate * timeStep / 1000; // Convert mass flow rate to kg/s
+            }
+
+            // Simulate rocket flight
+            simulateFlight(totalTime, timeStep) {
+                const flightData = [];
+                for (let t = 0; t <= totalTime; t += timeStep) {
+                    this.updateState(timeStep);
+                    flightData.push({ time: t, position: this.position, velocity: this.velocity });
+                }
+                return flightData;
+            }
+
+            // Calculate air resistance (drag)
+            calculateAirResistance() {
+                const dragCoefficient = 0.5; // Drag coefficient (assumed constant)
+                const dragForce = 0.5 * this.airDensity * this.velocity ** 2 * dragCoefficient * this.rocketArea; // Drag force (N)
+                return dragForce / this.mass; // Acceleration due to air resistance (m/s^2)
+            }
+        }
+
+        // Initialize initial propellant mass dropdown
         const initialMassDropdown = document.getElementById('initialMass');
-        for (let i = 1; i <= 100; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `${i} grams`;
-            initialMassDropdown.appendChild(option);
+        for (let i = 0; i <= 100; i++) {
+            initialMassDropdown.innerHTML += `<option value="${i}">${i} grams</option>`;
         }
     </script>
 </body>
