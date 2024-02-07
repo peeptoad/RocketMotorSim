@@ -21,7 +21,13 @@
         <label for="thrust">Thrust (lbs):</label>
         <input type="number" id="thrust">
         <button onclick="addData()">Add Data</button>
+    </div>
+    <div>
+        <label for="ejectionTime">Ejection Charge Time (seconds):</label>
+        <input type="number" id="ejectionTime">
         <button onclick="addEjectionCharge()">Add Ejection Charge</button>
+    </div>
+    <div>
         <button onclick="removeLastDataPoint()">Remove Last Data Point</button>
         <button onclick="calculateMetrics()">Calculate Metrics</button>
     </div>
@@ -87,12 +93,11 @@
 
         // Function to add ejection charge data point
         function addEjectionCharge() {
-            let timeInput = parseFloat(document.getElementById('time').value);
-            let initialMass = parseFloat(document.getElementById('initialMass').value);
+            let ejectionTime = parseFloat(document.getElementById('ejectionTime').value);
             
             // Add ejection charge data point with 0 thrust
             dataPoints.push({
-                time: timeInput,
+                time: ejectionTime,
                 thrust: 0
             });
 
@@ -147,3 +152,4 @@
     </script>
 </body>
 </html>
+
