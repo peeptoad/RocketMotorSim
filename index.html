@@ -34,17 +34,17 @@
 
     <script>
         // Initialize arrays to store data
-        let dataPoints = [];
+        let dataPoints = [{ time: 0, cumulativeThrust: 0 }];
 
         // Initialize chart
         const ctx = document.getElementById('performanceChart').getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: [0], // Add initial label for the start point
                 datasets: [{
                     label: 'Thrust (lbs)',
-                    data: [],
+                    data: [0], // Add initial data point for the start point
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
                     borderWidth: 1
@@ -82,7 +82,6 @@
 
             dataPoints.push({
                 time: timeInput,
-                thrust: thrustInput,
                 cumulativeThrust: cumulativeThrust
             });
 
@@ -101,9 +100,10 @@
             myChart.data.labels = [];
             myChart.data.datasets[0].data = [];
 
-            let time = 0;
+            let startTime = dataPoints[0].time; // Start time from the first data point
             for (let i = 0; i < dataPoints.length; i++) {
-                time += dataPoints[i].time;
+                // Calculate time relative to the first data point
+                let time = dataPoints[i].time - startTime;
                 myChart.data.labels.push(time.toFixed(2)); // Round time to 2 decimal places
                 myChart.data.datasets[0].data.push(dataPoints[i].cumulativeThrust);
             }
@@ -118,7 +118,7 @@
 
             for (let i = 0; i < dataPoints.length - 1; i++) {
                 let timeInterval = dataPoints[i + 1].time - dataPoints[i].time;
-                let avgThrust = (dataPoints[i].thrust + dataPoints[i + 1].thrust) / 2;
+                let avgThrust = dataPoints[i].cumulativeThrust / timeInterval;
                 
                 totalImpulseLbs += avgThrust * timeInterval;
                 totalImpulseNewton += avgThrust * 4.44822 * timeInterval; // Convert lbs to Newton
