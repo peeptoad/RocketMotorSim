@@ -43,7 +43,7 @@
             data: {
                 labels: [0], // Add initial label for the start point
                 datasets: [{
-                    label: 'Thrust (lbs)',
+                    label: 'Cumulative Thrust (lbs)',
                     data: [0], // Add initial data point for the start point
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
@@ -63,7 +63,7 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Thrust (lbs)'
+                            text: 'Cumulative Thrust (lbs)'
                         }
                     }
                 }
@@ -101,11 +101,13 @@
             myChart.data.datasets[0].data = [];
 
             let startTime = dataPoints[0].time; // Start time from the first data point
+            let startCumulativeThrust = dataPoints[0].cumulativeThrust; // Start cumulative thrust from the first data point
             for (let i = 0; i < dataPoints.length; i++) {
                 // Calculate time relative to the first data point
                 let time = dataPoints[i].time - startTime;
+                let cumulativeThrust = dataPoints[i].cumulativeThrust - startCumulativeThrust; // Adjust cumulative thrust relative to the start point
                 myChart.data.labels.push(time.toFixed(2)); // Round time to 2 decimal places
-                myChart.data.datasets[0].data.push(dataPoints[i].cumulativeThrust);
+                myChart.data.datasets[0].data.push(cumulativeThrust);
             }
 
             myChart.update();
@@ -139,5 +141,6 @@
     </script>
 </body>
 </html>
+
 
 
