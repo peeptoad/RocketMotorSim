@@ -57,7 +57,6 @@
         <input type="number" id="rocketDiameter">
         <label for="rocketLength">Rocket Length (inches):</label>
         <input type="number" id="rocketLength">
-        <!-- Additional inputs and options can be added here -->
         <button onclick="simulateFlight()">Simulate Flight</button>
     </div>
     <div id="flightResults">
@@ -275,11 +274,8 @@
             // Calculate cross-sectional area of the rocket (assuming cylindrical shape)
             let crossSectionalArea = Math.PI * Math.pow(rocketDiameter / 2, 2); // in square inches
 
-            // Calculate total drag force
-            let dragForce = 0.5 * airDensity * Math.pow((maxThrust / rocketWeight), 2) * dragCoefficient * crossSectionalArea;
-
             // Calculate acceleration during burn phase
-            let acceleration = maxThrust / (rocketWeight + (totalImpulse / gravity)); // in ft/s^2
+            let acceleration = maxThrust / rocketWeight; // in ft/s^2
 
             // Calculate maximum altitude reached during burn phase (ignoring drag initially)
             let maxAltitudeBurn = (acceleration * Math.pow(burnTime, 2)) / 8; // in feet
@@ -327,5 +323,6 @@
     </script>
 </body>
 </html>
+
 
 
