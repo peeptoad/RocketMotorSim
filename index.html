@@ -22,6 +22,14 @@
         </select>
     </div>
     <div>
+        <label for="rocketDiameter">Rocket Diameter (meters):</label>
+        <input type="number" id="rocketDiameter">
+    </div>
+    <div>
+        <label for="rocketLength">Rocket Length (meters):</label>
+        <input type="number" id="rocketLength">
+    </div>
+    <div>
         <label for="time">Time (seconds):</label>
         <input type="number" id="time">
         <label for="thrust">Thrust (lbs):</label>
@@ -54,6 +62,8 @@
         <p>Total Impulse per Unit Mass (N-sec/gram): <span id="totalImpulsePerUnitMass"></span></p>
         <p>Specific Impulse (seconds): <span id="specificImpulse"></span></p>
         <p>Peak Acceleration (m/s²): <span id="peakAcceleration"></span></p>
+        <p>Altitude (meters): <span id="altitude"></span></p>
+        <p>Speed (m/s): <span id="speed"></span></p>
     </div>
 
     <script>
@@ -164,6 +174,11 @@
 
             // Calculate and display peak acceleration
             document.getElementById('peakAcceleration').textContent = calculatePeakAcceleration().toFixed(2);
+
+            // Calculate and display altitude and speed
+            let altitudeSpeed = calculateAltitudeAndSpeed();
+            document.getElementById('altitude').textContent = altitudeSpeed.altitude.toFixed(2);
+            document.getElementById('speed').textContent = altitudeSpeed.speed.toFixed(2);
         }
 
         // Function to calculate peak acceleration
@@ -188,7 +203,57 @@
             let propellantMassConsumed = (initialPropellantMass / burnTime) * dataPoints[index].time;
             return initialRocketMass - propellantMassConsumed;
         }
+
+        // Function to calculate altitude and speed
+        function calculateAltitudeAndSpeed() {
+            const initialRocketMass = parseFloat(document.getElementById('initialRocketMass').value); // Initial rocket mass in grams
+            const initialPropellantMass = parseFloat(document.getElementById('initialPropellantMass').value); // Initial propellant mass in grams
+            const rocketDiameter = parseFloat(document.getElementById('rocketDiameter').value); // Rocket diameter in meters
+            const rocketLength = parseFloat(document.getElementById('rocketLength').value); // Rocket length in meters
+            const g = 9.81; // Acceleration due to gravity in m/s^2
+            const airDensity = 1.225; // Average air density at sea level in kg/m^3 (can be adjusted)
+            const dragCoefficient = 0.3; // Drag coefficient (depends on rocket design)
+
+            let altitude = 0; // Initial altitude in meters
+            let speed = 0; // Initial speed in meters per second
+
+            // Time step for numerical integration (in seconds)
+            const deltaTime = 0.1; // Adjust as needed for simulation accuracy
+
+            for (let i = 1; i < dataPoints.length; i++) {
+                // Calculate mass of the rocket at this time
+                const time = dataPoints[i].time;
+                const propellantMassConsumed = (initialPropellantMass / time) * dataPoints[i].time;
+                const rocketMass = initialRocketMass - propellantMassConsumed;
+
+                // Calculate thrust force (assuming constant thrust)
+                const thrust = dataPoints[i].thrust * 0.453592; // Convert thrust from lbs to N
+
+                // Calculate gravity force
+                const gravityForce = rocketMass * g;
+
+                // Calculate drag force using drag equation: F_drag = 0.5 * air_density * velocity^2 * drag_coefficient * cross-sectional_area
+                const crossSectionalArea = Math.PI * Math.pow(rocketDiameter / 2, 2); // Cross-sectional area in square meters
+                const dragForce = 0.5 * airDensity * Math.pow(speed, 2) * dragCoefficient * crossSectionalArea;
+
+                // Calculate net force on the rocket
+                const netForce = thrust - gravityForce - dragForce;
+
+                // Calculate acceleration (Newton's second law: F = ma)
+                const acceleration = netForce / rocketMass;
+
+                // Update speed and altitude using numerical integration
+                speed += acceleration * deltaTime;
+                altitude += speed * deltaTime;
+
+                // Display speed and altitude (for demonstration purposes)
+                console.log(`Time: ${time.toFixed(2)}s, Speed: ${speed.toFixed(2)}m/s, Altitude: ${altitude.toFixed(2)}m`);
+            }
+
+            return { altitude: altitude, speed: speed };
+        }
     </script>
 </body>
 </html>
+
 
