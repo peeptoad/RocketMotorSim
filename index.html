@@ -13,15 +13,7 @@
     <div>
         <label for="initialMass">Initial Propellant Mass:</label>
         <select id="initialMass">
-            <!-- Generate options from 0 to 100 grams in intervals of 1 gram -->
-            <!-- Using a loop to generate options -->
-            <!-- Start the loop from 0 and end at 100 -->
-            <!-- Increment by 1 for each iteration -->
-            <!-- Use string interpolation to include the gram value in each option -->
-            <!-- Value attribute of each option will have the gram value -->
-            <!-- Displayed text will be in grams -->
-            <!-- End of the loop -->
-            <!-- Total 101 options (0 to 100) -->
+            <!-- Options will be dynamically generated using JavaScript -->
         </select>
     </div>
     <div>
@@ -37,6 +29,15 @@
     </div>
 
     <script>
+        // Generate options for initial propellant mass dropdown
+        const initialMassDropdown = document.getElementById('initialMass');
+        for (let i = 1; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} grams`;
+            initialMassDropdown.appendChild(option);
+        }
+
         // Initialize arrays to store data
         let dataPoints = [];
 
