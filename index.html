@@ -40,6 +40,8 @@
         <p>Average Thrust (lbs): <span id="averageThrust"></span></p>
         <p>Average Thrust (N): <span id="averageThrustNewton"></span></p>
         <p>Burn Time (seconds): <span id="burnTime"></span></p>
+        <p>Time from Burnout to Ejection (seconds): <span id="burnoutToEjectionTime"></span></p>
+        <p>Total Duration (seconds): <span id="totalDuration"></span></p>
         <p>Total Impulse (lbs-sec): <span id="totalImpulseLbs"></span></p>
         <p>Total Impulse (N-sec): <span id="totalImpulseNewton"></span></p>
     </div>
@@ -154,6 +156,16 @@
             return dataPoints[dataPoints.length - 1].time - dataPoints[0].time;
         }
 
+        // Function to calculate time from burnout to ejection
+        function calculateBurnoutToEjectionTime() {
+            return dataPoints[dataPoints.length - 1].time - dataPoints[dataPoints.length - 2].time;
+        }
+
+        // Function to calculate total duration
+        function calculateTotalDuration() {
+            return dataPoints[dataPoints.length - 1].time;
+        }
+
         // Function to calculate area under the curve (total impulse)
         function calculateTotalImpulse() {
             let totalImpulse = 0;
@@ -176,6 +188,8 @@
             document.getElementById('averageThrust').textContent = averageThrust.toFixed(2);
             document.getElementById('averageThrustNewton').textContent = (averageThrust * 4.44822).toFixed(2); // Convert lbs to Newton
             document.getElementById('burnTime').textContent = calculateBurnTime().toFixed(2);
+            document.getElementById('burnoutToEjectionTime').textContent = calculateBurnoutToEjectionTime().toFixed(2);
+            document.getElementById('totalDuration').textContent = calculateTotalDuration().toFixed(2);
             document.getElementById('totalImpulseLbs').textContent = totalImpulse.toFixed(2);
             document.getElementById('totalImpulseNewton').textContent = (totalImpulse * 4.44822).toFixed(2); // Convert lbs to Newton
         }
