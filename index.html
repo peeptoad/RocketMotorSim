@@ -230,7 +230,9 @@
         function calculateSpecificImpulse() {
             let initialMass = parseFloat(document.getElementById('initialMass').value);
             let totalImpulse = calculateTotalImpulse();
-            return (totalImpulse / initialMass / 9.81).toFixed(2); // Convert total impulse from N-sec to kg*m/s^2 (N)
+            let burnTime = calculateBurnTime();
+            let massFlowRate = initialMass / burnTime; // Calculate mass flow rate based on burn time
+            return (totalImpulse / (massFlowRate * 9.81)).toFixed(2); // Convert total impulse from N-sec to kg*m/s^2 (N)
         }
 
         // Function to calculate thrust coefficient
@@ -269,4 +271,5 @@
     </script>
 </body>
 </html>
+
 
